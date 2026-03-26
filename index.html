@@ -337,6 +337,9 @@
     <div id="meta-row">
       <input class="meta-input" id="client-name-input" type="text" placeholder="Cliente" value="Cliente">
       <input class="meta-input" id="month-input" type="month" value="">
+      <button class="top-action-btn" onclick="saveJSON()" title="Guardar datos (JSON)">💾</button>
+      <button class="top-action-btn" onclick="triggerLoadJSON()" title="Cargar datos (JSON)">📂</button>
+      <input type="file" id="json-upload" accept=".json" style="display:none">
       <button class="top-action-btn" id="theme-btn" onclick="toggleTheme()" title="Cambiar tema">☀️</button>
       <button class="top-action-btn" onclick="exportToPDF()" title="Exportar reporte vectorizado (11 hojas)">📄 PDF</button>
     </div>
@@ -1304,6 +1307,99 @@ document.getElementById('ig-guardados-act').addEventListener('input', updateIgDe
 document.getElementById('ig-inter-act').addEventListener('input', updateIgDetails);
 document.getElementById('ig-alcance-act').addEventListener('input', () => { calcAlcance(); updateIgDetails(); calcTTAvg(); });
 document.getElementById('tt-views-act').addEventListener('input', calcTTAvg);
+
+
+// --- GUARDADO Y CARGA (JSON) ---
+function saveJSON() {
+  const data = {};
+  // Guardamos todos los inputs y textareas indexados (incluso los que no tienen ID, como los tops de contenido)
+  document.querySelectorAll('input:not([type="file"]), textarea').forEach((el, index) => {
+    const key = el.id || `unnamed-${index}`;
+    data[key] = el.value;
+  });
+  
+  const logoEl = document.getElementById('cover-logo-display');
+  if (logoEl.classList.contains('has-image')) {
+    const img = logoEl.querySelector('img');
+    if (img) data['_logo_base64'] = img.src;
+  }
+
+  const json = JSON.stringify(data);
+  const blob = new Blob([json], {type: "application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const clientName = document.getElementById('client-name-input').value || 'Cliente';
+  const month = document.getElementById('month-input').value || 'Mes';
+  a.download = `Reporte_${clientName}_${month}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function triggerLoadJSON() {
+  document.getElementById('json-upload').click();
+}
+
+document.getElementById('json-upload')?.addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    try {
+      const data = JSON.parse(evt.target.result);
+      const isNewMonth = confirm("¿Cargar datos para arrancar un NUEVO MES?\n\nAceptar: Mueve las métricas de este reporte al 'mes anterior' y limpia los números nuevos para que empieces a cargar.\n\nCancelar: Restaura una copia exacta (ideal para seguir editando un borrador).");
+
+      document.querySelectorAll('input:not([type="file"]), textarea').forEach((el, index) => {
+        const key = el.id || `unnamed-${index}`;
+        if (data.hasOwnProperty(key)) {
+          if (isNewMonth) {
+            if (key.endsWith('-prev')) return; // No pisar el mes anterior con el viejo
+            if (key === 'month-input') return; // Mantener el selector de fecha actual
+            
+            if (key.endsWith('-act')) {
+              // TRASPASO AUTOMÁTICO: Mover actual a anterior
+              const prevEl = document.getElementById(key.replace('-act', '-prev'));
+              if (prevEl) prevEl.value = data[key];
+              el.value = ''; // Vaciar el actual
+            } else if (['ig-sem1','ig-sem2','ig-sem3','ig-sem4','ig-pct-reels','ig-pct-feed','tt-v1','tt-v2','tt-v3','tt-v4','tt-v5','tt-v6','ig-com-input','ig-num-posts','ig-num-reels','ig-stories-avg','tt-num-videos'].includes(key)) {
+              el.value = ''; // Vaciar métricas específicas de gráficos
+            } else if (key.startsWith('unnamed-') && el.type === 'number') {
+              el.value = ''; // Vaciar los números sueltos (como reproducciones de top contenidos)
+            } else {
+              el.value = data[key]; // Cargar el resto (textos, planes, nombres)
+            }
+          } else {
+            // Carga de borrador exacto
+            el.value = data[key];
+          }
+        }
+      });
+
+      if (data['_logo_base64']) {
+        const logoDisplay = document.getElementById('cover-logo-display');
+        logoDisplay.innerHTML = `<img src="${data['_logo_base64']}" alt="Logo Cliente">`;
+        logoDisplay.classList.add('has-image');
+        document.getElementById('btn-remove-logo').style.display = 'inline-block';
+      }
+
+      // Disparar cálculos visuales
+      calcDeltas();
+      calcAlcance();
+      calcTTAvg();
+      updateIgDetails();
+      updateTLDR();
+      updateIgPieChart();
+      updateIgWeekChart();
+      updateTTChart();
+
+      // Resetear para permitir cargar el mismo archivo dos veces si se necesita
+      document.getElementById('json-upload').value = '';
+    } catch (err) {
+      alert("Error al leer el archivo JSON. Verificá que sea un archivo de guardado válido.");
+    }
+  };
+  reader.readAsText(file);
+});
 
 
 // --- PDF NATIVO ---
