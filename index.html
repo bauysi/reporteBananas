@@ -254,8 +254,8 @@
   /* ========================================================= */
   @media print {
     @page { 
-      /* Proporción 1080px (ancho) adaptable a pantallas verticales */
-      size: 1080px 1920px; 
+      /* Proporción móvil exacta para que las fuentes se vean grandes y legibles */
+      size: 480px 1100px; 
       margin: 0 !important; 
     }
     
@@ -272,7 +272,7 @@
     #topbar, #pagetabs, #bottom-nav, #logo-upload-group, #logo-text-group { display: none !important; }
     
     #app { 
-      max-width: 1000px !important; 
+      max-width: 480px !important; /* Ajustado al ancho móvil real */
       width: 100% !important; 
       margin: 0 auto !important; 
       padding: 0 !important; 
@@ -283,8 +283,9 @@
       display: block !important; 
       page-break-after: always !important; 
       page-break-inside: avoid !important;
-      padding: 60px 50px !important; /* Margen virtual interno */
-      min-height: 100vh !important;
+      padding: 40px 24px !important; /* Margen virtual interno optimizado para móvil */
+      height: 1100px !important; /* Altura generosa para asegurar 1 hoja por vista sin cortar texto */
+      overflow: hidden !important;
       margin: 0 !important;
       opacity: 1 !important;
       transform: none !important;
