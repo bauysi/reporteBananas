@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0A0A0A">
+<title>Reporte Mensual — Bananas Agency</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --black: #0A0A0A;
+    --white: #F5F2EC;
+    --yellow: #F5C842;
+    --yellow-dark: #C9A200;
+    --gray-1: #1A1A1A;
+    --gray-2: #2A2A2A;
+    --gray-3: #444;
+    --gray-4: #888;
+    --gray-5: #BBB;
+    --ig: #E1306C;
+    --tt: #010101;
+    --tt-accent: #69C9D0;
+    --pos: #22C55E;
+    --neg: #EF4444;
+    --font: 'DM Sans', sans-serif;
+    --mono: 'DM Mono', monospace;
+    --r: 12px;
+  }
+
+  /* LIGHT THEME VARIABLES */
+  [data-theme="light"] {
+    --black: #F5F2EC;
+    --white: #0A0A0A;
+    --gray-1: #FFFFFF;
+    --gray-2: #E5E5E5;
+    --gray-3: #CCCCCC;
+    --gray-4: #666666;
+    --gray-5: #333333;
+    --theme-color: #F5F2EC;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--black); color: var(--white); font-family: var(--font); transition: background 0.2s, color 0.2s; }
+
+  /* SHELL */
+  #app { display: flex; flex-direction: column; min-height: 100dvh; max-width: 480px; margin: 0 auto; }
+
+  /* TOP BAR */
+  #topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--black);
+    border-bottom: 1px solid var(--gray-2);
+    padding: 12px 16px;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    transition: background 0.2s;
+  }
+  #topbar .brand { font-family: var(--mono); font-size: 11px; color: var(--yellow); letter-spacing: 0.12em; text-transform: uppercase; }
+  #meta-row { display: flex; align-items: center; gap: 8px; }
+  .meta-input {
+    background: var(--gray-2); border: none; border-radius: 6px;
+    color: var(--white); font-family: var(--mono); font-size: 11px;
+    padding: 5px 8px; outline: none; width: 100px;
+    transition: background 0.2s, color 0.2s;
+  }
+  .meta-input:focus { outline: 1px solid var(--yellow); }
+  #client-name-input { width: 100px; }
+
+  .top-action-btn {
+    background: var(--gray-2); border: none; border-radius: 6px;
+    color: var(--white); font-family: var(--font); font-size: 14px;
+    padding: 4px 8px; cursor: pointer; transition: background 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .top-action-btn:hover { background: var(--gray-3); }
+
+  /* PAGE TABS */
+  #pagetabs {
+    display: flex; overflow-x: auto; gap: 2px;
+    padding: 8px 16px; background: var(--gray-1);
+    scrollbar-width: none;
+    transition: background 0.2s;
+  }
+  #pagetabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex-shrink: 0; padding: 6px 12px;
+    border: 1px solid var(--gray-3); border-radius: 20px;
+    background: none; color: var(--gray-4);
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em;
+    cursor: pointer; transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .tab-btn.active { background: var(--yellow); border-color: var(--yellow); color: #0A0A0A; font-weight: 500; }
+  [data-theme="light"] .tab-btn.active { color: #0A0A0A; }
+
+  /* PAGES */
+  .page { display: none; padding: 20px 16px 80px; animation: fadeIn 0.2s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* TYPOGRAPHY */
+  .page-label { font-family: var(--mono); font-size: 10px; color: var(--yellow); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
+  .page-title { font-size: 22px; font-weight: 600; line-height: 1.2; margin-bottom: 20px; }
+  .section-title { font-size: 12px; font-weight: 500; color: var(--gray-4); text-transform: uppercase; letter-spacing: 0.1em; margin: 24px 0 12px; border-top: 1px solid var(--gray-2); padding-top: 16px; }
+  .section-title:first-of-type { margin-top: 0; border: none; padding: 0; }
+
+  /* CARDS */
+  .card { background: var(--gray-1); border: 1px solid var(--gray-2); border-radius: var(--r); padding: 16px; margin-bottom: 12px; transition: background 0.2s, border 0.2s; }
+  .card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .card-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+
+  /* METRIC CARDS */
+  .metric { background: var(--gray-2); border-radius: 10px; padding: 12px 14px; transition: background 0.2s; }
+  .metric-label { font-size: 11px; color: var(--gray-4); margin-bottom: 6px; font-family: var(--mono); }
+  .metric-value { font-size: 22px; font-weight: 600; line-height: 1; }
+  .metric-delta { font-size: 12px; margin-top: 4px; font-family: var(--mono); }
+  .pos { color: var(--pos); }
+  .neg { color: var(--neg); }
+  .neutral { color: var(--gray-4); }
+
+  /* INPUTS */
+  .field-group { margin-bottom: 14px; }
+  .field-label { font-size: 11px; color: var(--gray-4); margin-bottom: 5px; font-family: var(--mono); display: block; }
+  .field-input {
+    width: 100%; background: var(--gray-2); border: 1px solid var(--gray-3);
+    border-radius: 8px; color: var(--white); font-family: var(--font); font-size: 15px;
+    padding: 10px 12px; outline: none; transition: border 0.15s, background 0.2s, color 0.2s;
+  }
+  .field-input:focus { border-color: var(--yellow); }
+  .field-input.number-input { font-family: var(--mono); font-size: 18px; }
+  .field-input[type="number"] { -moz-appearance: textfield; }
+  .field-input[type="number"]::-webkit-outer-spin-button,
+  .field-input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .field-input[type="file"] { font-size: 12px; padding: 8px; }
+  textarea.field-input { resize: vertical; min-height: 80px; line-height: 1.5; font-size: 14px; overflow: hidden; }
+
+  .btn-remove-logo { margin-top: 6px; font-size: 11px; font-family: var(--mono); background: none; border: 1px solid var(--gray-3); color: var(--neg); padding: 4px 8px; border-radius: 4px; cursor: pointer; display: none; }
+
+  /* PLATFORM BADGES */
+  .platform-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 500; font-family: var(--mono);
+    margin-bottom: 16px;
+  }
+  .badge-ig { background: rgba(225,48,108,0.15); color: var(--ig); border: 1px solid rgba(225,48,108,0.3); }
+  .badge-tt { background: rgba(105,201,208,0.1); color: var(--tt-accent); border: 1px solid rgba(105,201,208,0.3); }
+
+  /* CHART WRAP */
+  .chart-wrap { position: relative; width: 100%; height: 220px; margin: 12px 0; }
+  .chart-wrap-tall { height: 280px; }
+
+  /* COMPARISON TABLE */
+  .comp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .comp-table th { font-family: var(--mono); font-size: 10px; color: var(--gray-4); text-align: left; padding: 8px 4px; border-bottom: 1px solid var(--gray-2); }
+  .comp-table td { padding: 10px 4px; border-bottom: 1px solid var(--gray-2); vertical-align: middle; }
+  .comp-table tr:last-child td { border: none; }
+  .comp-table .metric-name { color: var(--gray-5); font-size: 12px; }
+  .comp-table .val { font-family: var(--mono); font-size: 14px; font-weight: 500; }
+  .comp-table .delta-cell { font-family: var(--mono); font-size: 12px; }
+
+  /* TOP CONTENT CARDS */
+  .content-card { background: var(--gray-2); border-radius: 10px; padding: 14px; margin-bottom: 10px; border-left: 3px solid var(--yellow); transition: background 0.2s; }
+  .content-rank { font-family: var(--mono); font-size: 10px; color: var(--yellow); margin-bottom: 6px; }
+  .content-title { font-size: 14px; font-weight: 500; margin-bottom: 8px; }
+  .content-stats { display: flex; gap: 12px; flex-wrap: wrap; }
+  .content-stat { font-family: var(--mono); font-size: 11px; color: var(--gray-4); }
+  .content-stat span { color: var(--white); }
+  .content-reason { font-size: 12px; color: var(--gray-4); margin-top: 8px; line-height: 1.5; }
+
+  /* PLAN BLOCKS */
+  .plan-block { margin-bottom: 16px; }
+  .plan-type { font-family: var(--mono); font-size: 10px; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-bottom: 10px; }
+  .plan-mantener { background: rgba(34,197,94,0.15); color: var(--pos); }
+  .plan-mejorar { background: rgba(245,200,66,0.15); color: var(--yellow); }
+  .plan-testear { background: rgba(105,201,208,0.15); color: var(--tt-accent); }
+  .plan-item { font-size: 14px; color: var(--gray-5); padding: 6px 0; border-bottom: 1px solid var(--gray-2); display: flex; align-items: flex-start; gap: 8px; }
+  .plan-item:last-child { border: none; }
+  .plan-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; margin-top: 7px; flex-shrink: 0; }
+
+  /* TLDR */
+  .tldr-stat { background: var(--gray-1); border: 1px solid var(--gray-2); border-radius: 10px; padding: 14px 16px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+  .tldr-label { font-size: 13px; color: var(--gray-5); }
+  .tldr-value { font-family: var(--mono); font-size: 16px; font-weight: 500; }
+
+  /* COVER */
+  .cover-logo { width: 64px; height: 64px; border-radius: 16px; background: var(--yellow); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 20px; font-weight: 500; color: #0A0A0A; margin-bottom: 24px; overflow: hidden; }
+  .cover-logo img { width: 100%; height: 100%; object-fit: cover; }
+  .cover-agency { font-family: var(--mono); font-size: 11px; color: var(--yellow); letter-spacing: 0.15em; margin-bottom: 8px; }
+  .cover-title { font-size: 28px; font-weight: 600; line-height: 1.2; margin-bottom: 8px; }
+  .cover-meta { font-size: 14px; color: var(--gray-4); font-family: var(--mono); }
+  .cover-divider { border: none; border-top: 1px solid var(--gray-2); margin: 24px 0; transition: border-color 0.2s; }
+  .cover-client-name { font-size: 32px; font-weight: 600; }
+  .cover-client-sub { font-size: 13px; color: var(--gray-4); margin-top: 4px; }
+
+  /* BOTTOM NAV */
+  #bottom-nav {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 480px;
+    background: rgba(var(--black), 0.95); backdrop-filter: blur(12px);
+    border-top: 1px solid var(--gray-2);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px 18px; gap: 8px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  [data-theme="light"] #bottom-nav { background: rgba(245, 242, 236, 0.95); }
+  .nav-arrow {
+    background: var(--gray-2); border: none; border-radius: 8px;
+    color: var(--white); font-size: 16px; padding: 10px 18px;
+    cursor: pointer; transition: background 0.15s, color 0.2s;
+  }
+  .nav-arrow:hover { background: var(--gray-3); }
+  .nav-arrow:disabled { opacity: 0.3; cursor: default; }
+  #page-indicator { font-family: var(--mono); font-size: 11px; color: var(--gray-4); text-align: center; flex: 1; }
+
+  /* UTIL */
+  .conclusion-box { background: rgba(245,200,66,0.08); border: 1px solid rgba(245,200,66,0.2); border-radius: 10px; padding: 14px; font-size: 14px; line-height: 1.6; color: var(--gray-5); margin: 12px 0; }
+  .conclusion-box strong { color: var(--yellow); font-weight: 500; }
+
+  /* 🖨️ PRINT RULES FOR PDF EXPORT */
+  @media print {
+    @page { margin: 1.5cm; }
+    html, body { background: var(--black) !important; color: var(--white) !important; height: auto; }
+    
+    #topbar, #pagetabs, #bottom-nav { display: none !important; }
+    #app { max-width: 100% !important; width: 100% !important; margin: 0; padding: 0; display: block; }
+    
+    /* Make all pages visible in print */
+    .page { 
+      display: block !important; 
+      padding: 0 !important; 
+      margin-bottom: 2cm !important; 
+      page-break-after: always; 
+      opacity: 1 !important; 
+      transform: none !important; 
+      animation: none !important; 
+    }
+    .page:last-child { page-break-after: auto; }
+    
+    /* Optimize inputs for printing */
+    .field-input { 
+      border-color: transparent !important; 
+      background: transparent !important; 
+      color: inherit !important; 
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+    textarea.field-input { overflow: visible !important; }
+    
+    /* Retain charts sizing */
+    .chart-wrap { page-break-inside: avoid; }
+    
+    /* Force background colors and layout */
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <div class="brand">🍌 Bananas</div>
+    <div id="meta-row">
+      <input class="meta-input" id="client-name-input" type="text" placeholder="Cliente" value="Cliente">
+      <input class="meta-input" id="month-input" type="month" value="">
+      <button class="top-action-btn" id="theme-btn" onclick="toggleTheme()" title="Cambiar tema">☀️</button>
+      <button class="top-action-btn" onclick="window.print()" title="Exportar todas las hojas a PDF">📄 PDF</button>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div id="pagetabs"></div>
+
+  <!-- PAGE 1 — PORTADA -->
+  <div class="page active" id="page-1">
+    <br>
+    <div class="cover-logo" id="cover-logo-display">BA</div>
+    <div class="cover-agency">Bananas Agency</div>
+    <div class="cover-title">Reporte Mensual</div>
+    <div class="cover-meta" id="cover-date-display">— Mes / Año</div>
+    <hr class="cover-divider">
+    <div class="cover-client-name" id="cover-client-display">Cliente</div>
+    <div class="cover-client-sub">Reporte de Redes Sociales</div>
+    <hr class="cover-divider">
+    
+    <div class="field-group">
+      <label class="field-label">Subir Logo (Reemplaza al texto)</label>
+      <input class="field-input" type="file" id="client-logo-upload" accept="image/*">
+      <button class="btn-remove-logo" id="btn-remove-logo" onclick="removeLogo()">Quitar imagen</button>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Texto / Iniciales (Si no hay logo)</label>
+      <input class="field-input" id="client-logo-text" type="text" placeholder="Iniciales o nombre corto" value="BA" oninput="updateLogoText(this.value)">
+    </div>
+    
+    <div class="field-group">
+      <label class="field-label">Nombre completo del cliente</label>
+      <input class="field-input" type="text" placeholder="Nombre del cliente" oninput="updateClientName(this.value)">
+    </div>
+  </div>
+
+  <!-- PAGE 2 — RESUMEN EJECUTIVO -->
+  <div class="page" id="page-2">
+    <div class="page-label">Hoja 2</div>
+    <div class="page-title">Resumen ejecutivo</div>
+
+    <div class="platform-badge badge-ig">Instagram</div>
+    <div class="card-row">
+      <div class="metric">
+        <div class="metric-label">Alcance</div>
+        <div class="metric-value pos" id="sum-ig-alcance-pct">+0%</div>
+        <div class="metric-delta neutral">vs mes anterior</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Seguidores nuevos</div>
+        <div class="metric-value pos" id="sum-ig-seg-pct">+0%</div>
+        <div class="metric-delta neutral">vs mes anterior</div>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Formato más fuerte este mes (IG)</label>
+      <input class="field-input" type="text" id="ig-formato-fuerte" placeholder="Ej: Reels de producto, Stories con encuesta..." value="">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Observación clave (IG)</label>
+      <input class="field-input" type="text" id="ig-obs" placeholder="Ej: Engagement estable, muchos guardados...">
+    </div>
+
+    <div class="platform-badge badge-tt">TikTok</div>
+    <div class="card-row">
+      <div class="metric">
+        <div class="metric-label">Alcance</div>
+        <div class="metric-value pos" id="sum-tt-alcance-pct">+0%</div>
+        <div class="metric-delta neutral">vs mes anterior</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Seguidores nuevos</div>
+        <div class="metric-value pos" id="sum-tt-seg-pct">+0%</div>
+        <div class="metric-delta neutral">vs mes anterior</div>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Formato más fuerte este mes (TT)</label>
+      <input class="field-input" type="text" id="tt-formato-fuerte" placeholder="Ej: TikToks espontáneos de producto...">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Observación clave (TT)</label>
+      <input class="field-input" type="text" id="tt-obs" placeholder="Ej: Muchos comentarios y visualizaciones...">
+    </div>
+
+    <div class="section-title">Conclusión del mes</div>
+    <textarea class="field-input" id="conclusion-mes" placeholder="Ej: TikTok está funcionando como canal de descubrimiento y alcance masivo, mientras que Instagram mantiene mejor conversión en interacción y comunidad." rows="4"></textarea>
+  </div>
+
+  <!-- PAGE 3 — MÉTRICAS GENERALES -->
+  <div class="page" id="page-3">
+    <div class="page-label">Hoja 3</div>
+    <div class="page-title">Métricas generales</div>
+
+    <div class="platform-badge badge-ig">Instagram</div>
+    <div class="card-row">
+      <div class="field-group">
+        <label class="field-label">Alcance total (actual)</label>
+        <input class="field-input number-input" type="number" id="ig-alcance-act" placeholder="0" oninput="calcDeltas()">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Alcance total (anterior)</label>
+        <input class="field-input number-input" type="number" id="ig-alcance-prev" placeholder="0" oninput="calcDeltas()">
+      </div>
+    </div>
+    <div class="card-row">
+      <div class="field-group">
+        <label class="field-label">Interacciones (actual)</label>
+        <input class="field-input number-input" type="number" id="ig-inter-act" placeholder="0" oninput="calcDeltas()">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Interacciones (anterior)</label>
+        <input class="field-input number-input" type="number" id="ig-inter-prev" placeholder="0" oninput="calcDeltas()">
+      </div>
+    </div>
+    <div class="card-row">
+      <div class="field-group">
+        <label class="field-label">Views reels (actual)</label>
+        <input class="field-input number-input" type="number" id="ig-views-act" placeholder="0" oninput="calcDeltas()">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Views reels (anterior)</label>
+        <input class="field-input number-input" type="number" id="ig-views-prev" placeholder="0" oninput="calcDeltas()">
+      </div>
+    </div>
+    <div class="card-row">
+      <div class="field-group">
+        <label class="field-label">Guardados (actual)</label>
+        <input class="field-input number-input" type="number" id="ig-guardados-act" placeholder="0" oninput="calcDeltas()">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Guardados (anterior)</label>
+        <input class="field-input number-input" type="number" id="ig-guardados-prev" placeholder="0" oninput="calcDeltas()">
+      </div>
+    </div>
+    <div class="card-row">
+      <div class="field-group">
+        <label class="field-label">Compartidos (actual)</label>
+        <input class="field-input number-input" type="number" id="ig-comp-act" placeholder="0" oninput="calcDeltas()">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Compartidos (anterior)</label>
+        <input class="field-input number-input" type="number" id="ig-comp-prev" placeholder="0" oninput="calcDeltas()">
+      </div>
+    </div>
+    <div class="card-row">
+      <div class="field-group">
+        <label class="field-label">Seguidores nuevos (actual)</label>
+        <input class="field-input number-input" type="number" id="ig-seg-act" placeholder="0" oninput="calcDeltas()">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Seguidores nuevos (anterior)</label>
+        <input class="field-input number-input" type="number" id="ig-seg-prev" placeholder="0" oninput="calcDeltas()">
+      </div>
+    </div>
+
+    <div class="platform-badge badge-tt">TikTok</div>
+    <div class="card-row">
+      <div class="field-group">
+        <label class="field-label">Views totales (actual)</label>
+        <input class="field-input number-input" type="number" id="tt-views-act" placeholder="0" oninput="calcDeltas()">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Views totales (anterior)</label>
+        <input class="field-input number-input" type="number" id="tt-views-prev" placeholder="0" oninput="calcDeltas()">
+      </div>
+    </div>
+    <div class="card-row">
+      <div class="field-group">
+        <label class="field-label">Likes (actual)</label>
+        <input class="field-input number-input" type="number" id="tt-likes-act" placeholder="0" oninput="calcDeltas()">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Likes (anterior)</label>
+        <input class="field-input number-input" type="number" id="tt-likes-prev" placeholder="0" oninput="calcDeltas()">
+      </div>
+    </div>
+    <div class="card-row">
+      <div class="field-group">
+        <label class="field-label">Comentarios (actual)</label>
+        <input class="field-input number-input" type="number" id="tt-com-act" placeholder="0" oninput="calcDeltas()">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Comentarios (anterior)</label>
+        <input class="field-input number-input" type="number" id="tt-com-prev" placeholder="0" oninput="calcDeltas()">
+      </div>
+    </div>
+    <div class="card-row">
+      <div class="field-group">
+        <label class="field-label">Compartidos (actual)</label>
+        <input class="field-input number-input" type="number" id="tt-comp-act" placeholder="0" oninput="calcDeltas()">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Compartidos (anterior)</label>
+        <input class="field-input number-input" type="number" id="tt-comp-prev" placeholder="0" oninput="calcDeltas()">
+      </div>
+    </div>
+    <div class="card-row">
+      <div class="field-group">
+        <label class="field-label">Seguidores nuevos (actual)</label>
+        <input class="field-input number-input" type="number" id="tt-seg-act" placeholder="0" oninput="calcDeltas()">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Seguidores nuevos (anterior)</label>
+        <input class="field-input number-input" type="number" id="tt-seg-prev" placeholder="0" oninput="calcDeltas()">
+      </div>
+    </div>
+
+    <!-- TABLA COMPARATIVA -->
+    <div class="section-title">Variaciones calculadas</div>
+    <div class="card">
+      <table class="comp-table">
+        <thead><tr><th>Métrica</th><th>Actual</th><th>Anterior</th><th>Variación</th></tr></thead>
+        <tbody id="deltas-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PAGE 4 — ALCANCE Y EXPOSICIÓN -->
+  <div class="page" id="page-4">
+    <div class="page-label">Hoja 4</div>
+    <div class="page-title">Alcance y exposición</div>
+
+    <div class="platform-badge badge-ig">Instagram</div>
+    <div class="card-row-3">
+      <div class="field-group">
+        <label class="field-label">Posts este mes</label>
+        <input class="field-input number-input" type="number" id="ig-num-posts" placeholder="0" oninput="calcAlcance()">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Reels este mes</label>
+        <input class="field-input number-input" type="number" id="ig-num-reels" placeholder="0" oninput="calcAlcance()">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Stories (promedio)</label>
+        <input class="field-input number-input" type="number" id="ig-stories-avg" placeholder="0" oninput="calcAlcance()">
+      </div>
+    </div>
+    <div class="card-row">
+      <div class="metric">
+        <div class="metric-label">Promedio por post</div>
+        <div class="metric-value" id="ig-avg-post">—</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Promedio por reel</div>
+        <div class="metric-value" id="ig-avg-reel">—</div>
+      </div>
+    </div>
+
+    <!-- GRÁFICO DISTRIBUCIÓN ALCANCE IG -->
+    <div class="section-title">Distribución del alcance (IG)</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px;font-size:12px;color:#888;">
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#E1306C;display:inline-block;"></span>Reels</span>
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#F5C842;display:inline-block;"></span>Feed</span>
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#444;display:inline-block;"></span>Stories</span>
+    </div>
+    <div class="field-group">
+      <label class="field-label">% alcance vía Reels</label>
+      <input class="field-input number-input" type="number" id="ig-pct-reels" placeholder="0" min="0" max="100" oninput="updateIgPieChart()">
+    </div>
+    <div class="field-group">
+      <label class="field-label">% alcance vía Feed</label>
+      <input class="field-input number-input" type="number" id="ig-pct-feed" placeholder="0" min="0" max="100" oninput="updateIgPieChart()">
+    </div>
+    <div style="display:flex;gap:12px;justify-content:center;margin-bottom:4px;">
+      <div style="position:relative;width:200px;height:200px;"><canvas id="igPieChart"></canvas></div>
+    </div>
+
+    <div class="section-title">Conclusión</div>
+    <textarea class="field-input" id="alcance-conclusion" placeholder='Ej: "El 72% del alcance provino de reels. El feed funciona mejor cuando se combina con video."' rows="3"></textarea>
+  </div>
+
+  <!-- PAGE 5 — INSTAGRAM EN DETALLE -->
+  <div class="page" id="page-5">
+    <div class="page-label">Hoja 5</div>
+    <div class="page-title">Instagram en detalle</div>
+    <div class="platform-badge badge-ig">Instagram</div>
+
+    <div class="card-row">
+      <div class="metric">
+        <div class="metric-label">Guardados totales</div>
+        <div class="metric-value" id="ig-detail-guardados">—</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Compartidos totales</div>
+        <div class="metric-value" id="ig-detail-comp">—</div>
+      </div>
+    </div>
+    <div class="card-row">
+      <div class="metric">
+        <div class="metric-label">Comentarios totales</div>
+        <div class="metric-value" id="ig-detail-com">—</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Tasa de interacción</div>
+        <div class="metric-value" id="ig-tasa">—</div>
+      </div>
+    </div>
+
+    <div class="section-title">Tasa de interacción (%) por semana</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <div class="field-group" style="flex:1"><label class="field-label">Sem 1</label><input class="field-input number-input" type="number" id="ig-sem1" placeholder="0" step="0.1" oninput="updateIgWeekChart()"></div>
+      <div class="field-group" style="flex:1"><label class="field-label">Sem 2</label><input class="field-input number-input" type="number" id="ig-sem2" placeholder="0" step="0.1" oninput="updateIgWeekChart()"></div>
+      <div class="field-group" style="flex:1"><label class="field-label">Sem 3</label><input class="field-input number-input" type="number" id="ig-sem3" placeholder="0" step="0.1" oninput="updateIgWeekChart()"></div>
+      <div class="field-group" style="flex:1"><label class="field-label">Sem 4</label><input class="field-input number-input" type="number" id="ig-sem4" placeholder="0" step="0.1" oninput="updateIgWeekChart()"></div>
+    </div>
+    <div class="chart-wrap"><canvas id="igWeekChart"></canvas></div>
+
+    <div class="field-group">
+      <label class="field-label">Comentarios totales (ingresar)</label>
+      <input class="field-input number-input" type="number" id="ig-com-input" placeholder="0" oninput="updateIgDetails()">
+    </div>
+
+    <div class="section-title">Conclusión</div>
+    <textarea class="field-input" id="ig-detail-conclusion" placeholder='Ej: "Los contenidos promocionales generaron 40% más guardados que los informativos."' rows="3"></textarea>
+  </div>
+
+  <!-- PAGE 6 — TIKTOK EN DETALLE -->
+  <div class="page" id="page-6">
+    <div class="page-label">Hoja 6</div>
+    <div class="page-title">TikTok en detalle</div>
+    <div class="platform-badge badge-tt">TikTok</div>
+
+    <div class="field-group">
+      <label class="field-label">Cantidad de videos publicados</label>
+      <input class="field-input number-input" type="number" id="tt-num-videos" placeholder="0" oninput="calcTTAvg()">
+    </div>
+
+    <div class="card-row">
+      <div class="metric">
+        <div class="metric-label">Views totales</div>
+        <div class="metric-value" id="tt-detail-views">—</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Promedio por video</div>
+        <div class="metric-value" id="tt-avg-views">—</div>
+      </div>
+    </div>
+
+    <div class="section-title">Visualizaciones por video (top 6)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+      <div class="field-group"><label class="field-label">Video 1</label><input class="field-input number-input" type="number" id="tt-v1" placeholder="0" oninput="updateTTChart()"></div>
+      <div class="field-group"><label class="field-label">Video 2</label><input class="field-input number-input" type="number" id="tt-v2" placeholder="0" oninput="updateTTChart()"></div>
+      <div class="field-group"><label class="field-label">Video 3</label><input class="field-input number-input" type="number" id="tt-v3" placeholder="0" oninput="updateTTChart()"></div>
+      <div class="field-group"><label class="field-label">Video 4</label><input class="field-input number-input" type="number" id="tt-v4" placeholder="0" oninput="updateTTChart()"></div>
+      <div class="field-group"><label class="field-label">Video 5</label><input class="field-input number-input" type="number" id="tt-v5" placeholder="0" oninput="updateTTChart()"></div>
+      <div class="field-group"><label class="field-label">Video 6</label><input class="field-input number-input" type="number" id="tt-v6" placeholder="0" oninput="updateTTChart()"></div>
+    </div>
+    <div class="chart-wrap chart-wrap-tall"><canvas id="ttBarChart"></canvas></div>
+
+    <div class="field-group">
+      <label class="field-label">Video con mayor retención (nombre/descripción)</label>
+      <input class="field-input" type="text" id="tt-top-retencion" placeholder="Ej: Video del producto en uso, 45 seg">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Video con más comentarios</label>
+      <input class="field-input" type="text" id="tt-top-comentarios" placeholder="Ej: Video pregunta directa a cámara">
+    </div>
+
+    <div class="section-title">Conclusión</div>
+    <textarea class="field-input" id="tt-detail-conclusion" placeholder='Ej: "Los TikToks con formato espontáneo superaron en un 60% a los más producidos."' rows="3"></textarea>
+  </div>
+
+  <!-- PAGE 7 — TOP CONTENIDOS -->
+  <div class="page" id="page-7">
+    <div class="page-label">Hoja 7</div>
+    <div class="page-title">Top contenidos del mes</div>
+
+    <div class="platform-badge badge-ig">Instagram — Top 3</div>
+    <div id="ig-top-cards">
+      <div class="content-card">
+        <div class="content-rank">IG #1</div>
+        <input class="field-input" type="text" placeholder="Descripción del contenido / título" style="margin-bottom:8px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <input class="field-input number-input" type="number" placeholder="Alcance" style="font-size:14px;">
+          <input class="field-input number-input" type="number" placeholder="Guardados" style="font-size:14px;">
+        </div>
+        <input class="field-input" type="text" placeholder="¿Por qué funcionó? Hook fuerte, producto en uso real..." style="margin-top:8px;">
+      </div>
+      <div class="content-card">
+        <div class="content-rank">IG #2</div>
+        <input class="field-input" type="text" placeholder="Descripción del contenido / título" style="margin-bottom:8px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <input class="field-input number-input" type="number" placeholder="Alcance" style="font-size:14px;">
+          <input class="field-input number-input" type="number" placeholder="Guardados" style="font-size:14px;">
+        </div>
+        <input class="field-input" type="text" placeholder="¿Por qué funcionó?" style="margin-top:8px;">
+      </div>
+      <div class="content-card">
+        <div class="content-rank">IG #3</div>
+        <input class="field-input" type="text" placeholder="Descripción del contenido / título" style="margin-bottom:8px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <input class="field-input number-input" type="number" placeholder="Alcance" style="font-size:14px;">
+          <input class="field-input number-input" type="number" placeholder="Guardados" style="font-size:14px;">
+        </div>
+        <input class="field-input" type="text" placeholder="¿Por qué funcionó?" style="margin-top:8px;">
+      </div>
+    </div>
+
+    <div class="platform-badge badge-tt" style="margin-top:20px;">TikTok — Top 3</div>
+    <div class="content-card">
+      <div class="content-rank">TT #1</div>
+      <input class="field-input" type="text" placeholder="Descripción del video / título" style="margin-bottom:8px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <input class="field-input number-input" type="number" placeholder="Views" style="font-size:14px;">
+        <input class="field-input number-input" type="number" placeholder="Comentarios" style="font-size:14px;">
+      </div>
+      <input class="field-input" type="text" placeholder="¿Por qué funcionó? Hook, formato, CTA..." style="margin-top:8px;">
+    </div>
+    <div class="content-card">
+      <div class="content-rank">TT #2</div>
+      <input class="field-input" type="text" placeholder="Descripción del video / título" style="margin-bottom:8px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <input class="field-input number-input" type="number" placeholder="Views" style="font-size:14px;">
+        <input class="field-input number-input" type="number" placeholder="Comentarios" style="font-size:14px;">
+      </div>
+      <input class="field-input" type="text" placeholder="¿Por qué funcionó?" style="margin-top:8px;">
+    </div>
+    <div class="content-card">
+      <div class="content-rank">TT #3</div>
+      <input class="field-input" type="text" placeholder="Descripción del video / título" style="margin-bottom:8px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <input class="field-input number-input" type="number" placeholder="Views" style="font-size:14px;">
+        <input class="field-input number-input" type="number" placeholder="Comentarios" style="font-size:14px;">
+      </div>
+      <input class="field-input" type="text" placeholder="¿Por qué funcionó?" style="margin-top:8px;">
+    </div>
+  </div>
+
+  <!-- PAGE 8 — CONTENIDO QUE MENOS FUNCIONÓ -->
+  <div class="page" id="page-8">
+    <div class="page-label">Hoja 8</div>
+    <div class="page-title">Contenido que menos funcionó</div>
+
+    <div class="platform-badge badge-ig">Instagram</div>
+    <div class="field-group">
+      <label class="field-label">Descripción del contenido</label>
+      <input class="field-input" type="text" placeholder="Ej: Carrusel estático del día 15">
+    </div>
+    <div class="card-row">
+      <div class="field-group">
+        <label class="field-label">Alcance</label>
+        <input class="field-input number-input" type="number" placeholder="0">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Interacciones</label>
+        <input class="field-input number-input" type="number" placeholder="0">
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">¿Por qué no funcionó?</label>
+      <textarea class="field-input" placeholder="Ej: Bajo engagement en carruseles estáticos sin CTA claro ni hook visual." rows="3"></textarea>
+    </div>
+
+    <div class="platform-badge badge-tt">TikTok</div>
+    <div class="field-group">
+      <label class="field-label">Descripción del video</label>
+      <input class="field-input" type="text" placeholder="Ej: Video de presentación de colección, 30 seg">
+    </div>
+    <div class="card-row">
+      <div class="field-group">
+        <label class="field-label">Views</label>
+        <input class="field-input number-input" type="number" placeholder="0">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Comentarios</label>
+        <input class="field-input number-input" type="number" placeholder="0">
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">¿Por qué no funcionó?</label>
+      <textarea class="field-input" placeholder="Ej: Sin hook claro en los primeros 3 segundos. Baja retención." rows="3"></textarea>
+    </div>
+  </div>
+
+  <!-- PAGE 9 — PLAN PRÓXIMO MES -->
+  <div class="page" id="page-9">
+    <div class="page-label">Hoja 9</div>
+    <div class="page-title">Plan próximo mes</div>
+
+    <div class="platform-badge badge-ig">Instagram</div>
+
+    <div class="plan-block">
+      <div class="plan-type plan-mantener">Mantener</div>
+      <div id="ig-mantener-items">
+        <div class="plan-item"><div class="plan-dot" style="color:var(--pos)"></div><input class="field-input" type="text" placeholder="Más reels de producto" style="border:none;background:none;padding:0;font-size:14px;color:var(--gray-5)"></div>
+        <div class="plan-item"><div class="plan-dot" style="color:var(--pos)"></div><input class="field-input" type="text" placeholder="CTA claros en cada posteo" style="border:none;background:none;padding:0;font-size:14px;color:var(--gray-5)"></div>
+      </div>
+    </div>
+
+    <div class="plan-block">
+      <div class="plan-type plan-mejorar">Mejorar</div>
+      <div>
+        <div class="plan-item"><div class="plan-dot" style="color:var(--yellow)"></div><input class="field-input" type="text" placeholder="Interacción en stories" style="border:none;background:none;padding:0;font-size:14px;color:var(--gray-5)"></div>
+        <div class="plan-item"><div class="plan-dot" style="color:var(--yellow)"></div><input class="field-input" type="text" placeholder="Más contenido educativo" style="border:none;background:none;padding:0;font-size:14px;color:var(--gray-5)"></div>
+      </div>
+    </div>
+
+    <div class="plan-block">
+      <div class="plan-type plan-testear">Testear</div>
+      <div>
+        <div class="plan-item"><div class="plan-dot" style="color:var(--tt-accent)"></div><input class="field-input" type="text" placeholder="Nuevo formato comparativo" style="border:none;background:none;padding:0;font-size:14px;color:var(--gray-5)"></div>
+        <div class="plan-item"><div class="plan-dot" style="color:var(--tt-accent)"></div><input class="field-input" type="text" placeholder="Reel testimonial" style="border:none;background:none;padding:0;font-size:14px;color:var(--gray-5)"></div>
+      </div>
+    </div>
+
+    <div class="platform-badge badge-tt" style="margin-top:20px;">TikTok</div>
+
+    <div class="plan-block">
+      <div class="plan-type plan-mantener">Mantener</div>
+      <div>
+        <div class="plan-item"><div class="plan-dot" style="color:var(--pos)"></div><input class="field-input" type="text" placeholder="TikToks de producto con hooks fuertes" style="border:none;background:none;padding:0;font-size:14px;color:var(--gray-5)"></div>
+        <div class="plan-item"><div class="plan-dot" style="color:var(--pos)"></div><input class="field-input" type="text" placeholder="Frecuencia de publicación" style="border:none;background:none;padding:0;font-size:14px;color:var(--gray-5)"></div>
+      </div>
+    </div>
+
+    <div class="plan-block">
+      <div class="plan-type plan-mejorar">Mejorar</div>
+      <div>
+        <div class="plan-item"><div class="plan-dot" style="color:var(--yellow)"></div><input class="field-input" type="text" placeholder="Contenido más orgánico y nativo" style="border:none;background:none;padding:0;font-size:14px;color:var(--gray-5)"></div>
+        <div class="plan-item"><div class="plan-dot" style="color:var(--yellow)"></div><input class="field-input" type="text" placeholder="Videos 100% pensados para TikTok" style="border:none;background:none;padding:0;font-size:14px;color:var(--gray-5)"></div>
+      </div>
+    </div>
+
+    <div class="plan-block">
+      <div class="plan-type plan-testear">Testear</div>
+      <div>
+        <div class="plan-item"><div class="plan-dot" style="color:var(--tt-accent)"></div><input class="field-input" type="text" placeholder="Videos testimoniales de clientes" style="border:none;background:none;padding:0;font-size:14px;color:var(--gray-5)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE 10 — CONCLUSIÓN HONESTA -->
+  <div class="page" id="page-10">
+    <div class="page-label">Hoja 10</div>
+    <div class="page-title">Conclusión honesta</div>
+
+    <div class="section-title" style="margin-top:0;border:none;padding:0;">Lo positivo del mes</div>
+    <textarea class="field-input" id="conclusion-pos" placeholder="Describí los logros reales del mes. Sé específico y honesto." rows="5" style="margin-bottom:16px;"></textarea>
+
+    <div class="section-title">Lo que hay que mejorar</div>
+    <textarea class="field-input" id="conclusion-neg" placeholder="Describí lo que no funcionó o no se hizo bien. Incluí causas posibles (falta de contenido, mismo formato hace 2 meses, etc.)" rows="5" style="margin-bottom:16px;"></textarea>
+
+    <div class="section-title">Cómo lo vamos a resolver</div>
+    <textarea class="field-input" id="conclusion-plan" placeholder="Plan de acción concreto para el mes siguiente." rows="4" style="margin-bottom:16px;"></textarea>
+
+    <div class="section-title">Cierre</div>
+    <div class="card" style="text-align:center;padding:32px 20px;">
+      <div style="font-size:28px;margin-bottom:12px;">🍌</div>
+      <div style="font-size:16px;font-weight:500;margin-bottom:6px;">Muchas gracias por confiar en nosotros.</div>
+      <div style="font-size:13px;color:var(--gray-4);font-family:var(--mono);">Bananas Agency</div>
+    </div>
+  </div>
+
+  <!-- PAGE 11 — TLDR -->
+  <div class="page" id="page-11">
+    <div class="page-label">TLDR</div>
+    <div class="page-title">Resumen ejecutivo final</div>
+
+    <div class="platform-badge badge-ig">Instagram</div>
+    <div class="tldr-stat">
+      <div class="tldr-label">Alcance total</div>
+      <div class="tldr-value" id="tldr-ig-alcance">—</div>
+    </div>
+    <div class="tldr-stat">
+      <div class="tldr-label">Variación alcance</div>
+      <div class="tldr-value" id="tldr-ig-alcance-delta">—</div>
+    </div>
+    <div class="tldr-stat">
+      <div class="tldr-label">Seguidores nuevos</div>
+      <div class="tldr-value" id="tldr-ig-seg">—</div>
+    </div>
+    <div class="tldr-stat">
+      <div class="tldr-label">Variación seguidores</div>
+      <div class="tldr-value" id="tldr-ig-seg-delta">—</div>
+    </div>
+    <div class="tldr-stat">
+      <div class="tldr-label">Views de reels</div>
+      <div class="tldr-value" id="tldr-ig-views">—</div>
+    </div>
+
+    <div class="platform-badge badge-tt" style="margin-top:20px;">TikTok</div>
+    <div class="tldr-stat">
+      <div class="tldr-label">Views totales</div>
+      <div class="tldr-value" id="tldr-tt-views">—</div>
+    </div>
+    <div class="tldr-stat">
+      <div class="tldr-label">Variación views</div>
+      <div class="tldr-value" id="tldr-tt-views-delta">—</div>
+    </div>
+    <div class="tldr-stat">
+      <div class="tldr-label">Seguidores nuevos</div>
+      <div class="tldr-value" id="tldr-tt-seg">—</div>
+    </div>
+    <div class="tldr-stat">
+      <div class="tldr-label">Variación seguidores</div>
+      <div class="tldr-value" id="tldr-tt-seg-delta">—</div>
+    </div>
+
+    <div class="section-title">Conclusión del mes</div>
+    <div class="conclusion-box" id="tldr-conclusion-display">
+      <em style="color:var(--gray-3);">Completá la conclusión en la Hoja 2 para que aparezca acá.</em>
+    </div>
+
+    <div class="section-title">Formato más fuerte</div>
+    <div class="card-row">
+      <div class="card" style="text-align:center;">
+        <div style="font-size:11px;color:var(--ig);font-family:var(--mono);margin-bottom:6px;">INSTAGRAM</div>
+        <div id="tldr-ig-formato" style="font-size:14px;color:var(--gray-5);">—</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="font-size:11px;color:var(--tt-accent);font-family:var(--mono);margin-bottom:6px;">TIKTOK</div>
+        <div id="tldr-tt-formato" style="font-size:14px;color:var(--gray-5);">—</div>
+      </div>
+    </div>
+
+    <!-- MINI CHART OVERVIEW -->
+    <div class="section-title">Alcance comparativo</div>
+    <div style="display:flex;gap:12px;margin-bottom:8px;font-size:12px;color:#888;">
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#E1306C;display:inline-block;"></span>Mes actual</span>
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#444;display:inline-block;"></span>Mes anterior</span>
+    </div>
+    <div class="chart-wrap"><canvas id="tldrCompChart"></canvas></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div id="bottom-nav">
+    <button class="nav-arrow" id="btn-prev" onclick="navigate(-1)">←</button>
+    <div id="page-indicator">1 / 11</div>
+    <button class="nav-arrow" id="btn-next" onclick="navigate(1)">→</button>
+  </div>
+</div>
+
+<script>
+const PAGES = 11;
+const PAGE_LABELS = ['Portada','Resumen','Métricas','Alcance','IG Detalle','TT Detalle','Top Contenidos','Lo que no funcionó','Plan próximo mes','Conclusión','TLDR'];
+let currentPage = 1;
+
+// Theme logic
+let isLightMode = false;
+function toggleTheme() {
+  isLightMode = !isLightMode;
+  document.documentElement.setAttribute('data-theme', isLightMode ? 'light' : 'dark');
+  document.getElementById('theme-btn').textContent = isLightMode ? '🌙' : '☀️';
+  document.getElementById('theme-btn').title = isLightMode ? 'Modo oscuro' : 'Modo claro';
+
+  // Actualizar colores de los gráficos para que combinen
+  const textColor = isLightMode ? '#666666' : '#888888';
+  const gridColor = isLightMode ? '#E5E5E5' : '#2A2A2A';
+  
+  Chart.defaults.color = textColor;
+  [igWeekChart, ttBarChart, tldrCompChart].forEach(chart => {
+    if(chart) {
+      if(chart.options.scales.x) {
+        chart.options.scales.x.ticks.color = textColor;
+        chart.options.scales.x.grid.color = gridColor;
+      }
+      if(chart.options.scales.y) {
+        chart.options.scales.y.ticks.color = textColor;
+        chart.options.scales.y.grid.color = gridColor;
+      }
+      chart.update('none');
+    }
+  });
+}
+
+// Logo upload logic
+const logoInput = document.getElementById('client-logo-upload');
+const logoDisplay = document.getElementById('cover-logo-display');
+const logoText = document.getElementById('client-logo-text');
+const btnRemoveLogo = document.getElementById('btn-remove-logo');
+
+logoInput.addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      logoDisplay.innerHTML = `<img src="${evt.target.result}" alt="Logo Cliente">`;
+      logoDisplay.style.background = 'transparent';
+      btnRemoveLogo.style.display = 'inline-block';
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+function removeLogo() {
+  logoInput.value = '';
+  logoDisplay.innerHTML = logoText.value || 'BA';
+  logoDisplay.style.background = 'var(--yellow)';
+  btnRemoveLogo.style.display = 'none';
+}
+
+function updateLogoText(val) {
+  if (!logoInput.files || logoInput.files.length === 0) {
+    logoDisplay.innerHTML = val || 'BA';
+    logoDisplay.style.background = 'var(--yellow)';
+  }
+}
+
+// Auto-resize textareas (útil para la exportación a PDF)
+document.querySelectorAll('textarea').forEach(el => {
+  el.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = (this.scrollHeight) + 'px';
+  });
+});
+
+// Init tabs
+const tabsEl = document.getElementById('pagetabs');
+PAGE_LABELS.forEach((label, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'tab-btn' + (i === 0 ? ' active' : '');
+  btn.textContent = label;
+  btn.onclick = () => goTo(i + 1);
+  tabsEl.appendChild(btn);
+});
+
+function goTo(n) {
+  document.querySelector('.page.active')?.classList.remove('active');
+  document.getElementById('page-' + n).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === n - 1));
+  currentPage = n;
+  document.getElementById('page-indicator').textContent = n + ' / ' + PAGES;
+  document.getElementById('btn-prev').disabled = n === 1;
+  document.getElementById('btn-next').disabled = n === PAGES;
+  tabsEl.children[n - 1]?.scrollIntoView({ inline: 'center', behavior: 'smooth' });
+  updateTLDR();
+}
+
+function navigate(dir) { goTo(Math.min(PAGES, Math.max(1, currentPage + dir))); }
+
+// Init month input
+const monthEl = document.getElementById('month-input');
+const now = new Date();
+monthEl.value = now.toISOString().slice(0, 7);
+monthEl.addEventListener('input', updateCoverDate);
+
+function updateCoverDate() {
+  const v = monthEl.value;
+  if (!v) return;
+  const [y, m] = v.split('-');
+  const months = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('cover-date-display').textContent = '— ' + months[parseInt(m) - 1] + ' ' + y;
+}
+updateCoverDate();
+
+function updateClientName(val) {
+  document.getElementById('cover-client-display').textContent = val || 'Cliente';
+  document.getElementById('client-name-input').value = val;
+}
+document.getElementById('client-name-input').addEventListener('input', e => {
+  document.getElementById('cover-client-display').textContent = e.target.value || 'Cliente';
+});
+
+// Delta helper
+function delta(act, prev) {
+  if (!prev || prev == 0) return null;
+  return ((act - prev) / prev * 100).toFixed(1);
+}
+function fmtDelta(d) {
+  if (d === null) return '—';
+  const n = parseFloat(d);
+  return (n >= 0 ? '+' : '') + d + '%';
+}
+function fmtNum(n) {
+  if (!n && n !== 0) return '—';
+  return parseInt(n).toLocaleString('es-AR');
+}
+
+function calcDeltas() {
+  const metrics = [
+    { label: 'IG Alcance', actId: 'ig-alcance-act', prevId: 'ig-alcance-prev', platform: 'ig' },
+    { label: 'IG Interacciones', actId: 'ig-inter-act', prevId: 'ig-inter-prev' },
+    { label: 'IG Views reels', actId: 'ig-views-act', prevId: 'ig-views-prev' },
+    { label: 'IG Guardados', actId: 'ig-guardados-act', prevId: 'ig-guardados-prev' },
+    { label: 'IG Compartidos', actId: 'ig-comp-act', prevId: 'ig-comp-prev' },
+    { label: 'IG Seguidores nuevos', actId: 'ig-seg-act', prevId: 'ig-seg-prev', platform: 'ig-seg' },
+    { label: 'TT Views', actId: 'tt-views-act', prevId: 'tt-views-prev', platform: 'tt' },
+    { label: 'TT Likes', actId: 'tt-likes-act', prevId: 'tt-likes-prev' },
+    { label: 'TT Comentarios', actId: 'tt-com-act', prevId: 'tt-com-prev' },
+    { label: 'TT Compartidos', actId: 'tt-comp-act', prevId: 'tt-comp-prev' },
+    { label: 'TT Seguidores nuevos', actId: 'tt-seg-act', prevId: 'tt-seg-prev', platform: 'tt-seg' },
+  ];
+  const tbody = document.getElementById('deltas-table');
+  tbody.innerHTML = '';
+  metrics.forEach(m => {
+    const act = parseFloat(document.getElementById(m.actId)?.value) || 0;
+    const prev = parseFloat(document.getElementById(m.prevId)?.value) || 0;
+    const d = delta(act, prev);
+    const dFmt = fmtDelta(d);
+    const cls = d === null ? 'neutral' : parseFloat(d) >= 0 ? 'pos' : 'neg';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="metric-name">${m.label}</td><td class="val">${fmtNum(act)}</td><td class="val" style="color:var(--gray-4)">${fmtNum(prev)}</td><td class="delta-cell ${cls}">${dFmt}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  // Update summary page 2
+  const igAlcanceDelta = delta(parseFloat(document.getElementById('ig-alcance-act').value)||0, parseFloat(document.getElementById('ig-alcance-prev').value)||0);
+  const igSegDelta = delta(parseFloat(document.getElementById('ig-seg-act').value)||0, parseFloat(document.getElementById('ig-seg-prev').value)||0);
+  const ttViewsDelta = delta(parseFloat(document.getElementById('tt-views-act').value)||0, parseFloat(document.getElementById('tt-views-prev').value)||0);
+  const ttSegDelta = delta(parseFloat(document.getElementById('tt-seg-act').value)||0, parseFloat(document.getElementById('tt-seg-prev').value)||0);
+
+  setDeltaEl('sum-ig-alcance-pct', igAlcanceDelta);
+  setDeltaEl('sum-ig-seg-pct', igSegDelta);
+  setDeltaEl('sum-tt-alcance-pct', ttViewsDelta);
+  setDeltaEl('sum-tt-seg-pct', ttSegDelta);
+
+  updateTLDR();
+  updateTLDRChart();
+}
+
+function setDeltaEl(id, d) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const fmt = fmtDelta(d);
+  el.textContent = fmt;
+  el.className = 'metric-value ' + (d === null ? 'neutral' : parseFloat(d) >= 0 ? 'pos' : 'neg');
+}
+
+function calcAlcance() {
+  const igAlcance = parseFloat(document.getElementById('ig-alcance-act').value) || 0;
+  const numPosts = parseFloat(document.getElementById('ig-num-posts').value) || 0;
+  const numReels = parseFloat(document.getElementById('ig-num-reels').value) || 0;
+  document.getElementById('ig-avg-post').textContent = numPosts > 0 ? fmtNum(Math.round(igAlcance / numPosts)) : '—';
+  document.getElementById('ig-avg-reel').textContent = numReels > 0 ? fmtNum(Math.round(igAlcance / numReels)) : '—';
+}
+
+function calcTTAvg() {
+  const ttViews = parseFloat(document.getElementById('tt-views-act').value) || 0;
+  const numVideos = parseFloat(document.getElementById('tt-num-videos').value) || 0;
+  document.getElementById('tt-detail-views').textContent = fmtNum(ttViews);
+  document.getElementById('tt-avg-views').textContent = numVideos > 0 ? fmtNum(Math.round(ttViews / numVideos)) : '—';
+}
+
+function updateIgDetails() {
+  document.getElementById('ig-detail-guardados').textContent = fmtNum(document.getElementById('ig-guardados-act').value || 0);
+  document.getElementById('ig-detail-comp').textContent = fmtNum(document.getElementById('ig-comp-act').value || 0);
+  const com = parseFloat(document.getElementById('ig-com-input').value) || 0;
+  document.getElementById('ig-detail-com').textContent = fmtNum(com);
+  const alcance = parseFloat(document.getElementById('ig-alcance-act').value) || 0;
+  const inter = parseFloat(document.getElementById('ig-inter-act').value) || 0;
+  document.getElementById('ig-tasa').textContent = alcance > 0 ? (inter / alcance * 100).toFixed(2) + '%' : '—';
+}
+
+// CHARTS
+let igPieChart, igWeekChart, ttBarChart, tldrCompChart;
+
+function initCharts() {
+  Chart.defaults.color = '#888';
+  Chart.defaults.font.family = 'DM Mono, monospace';
+  Chart.defaults.font.size = 11;
+
+  // IG Pie
+  igPieChart = new Chart(document.getElementById('igPieChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Reels', 'Feed', 'Stories'],
+      datasets: [{ data: [0, 0, 100], backgroundColor: ['#E1306C', '#F5C842', '#444'], borderWidth: 0, hoverBorderWidth: 0 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.parsed + '%' } } },
+      cutout: '68%'
+    }
+  });
+
+  // IG Weekly engagement
+  igWeekChart = new Chart(document.getElementById('igWeekChart'), {
+    type: 'line',
+    data: {
+      labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'],
+      datasets: [{
+        label: 'Tasa interacción %',
+        data: [0, 0, 0, 0],
+        borderColor: '#E1306C',
+        backgroundColor: 'rgba(225,48,108,0.1)',
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#E1306C',
+        pointRadius: 5
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: '#2A2A2A' }, ticks: { color: '#888' } },
+        y: { grid: { color: '#2A2A2A' }, ticks: { color: '#888', callback: v => v + '%' } }
+      }
+    }
+  });
+
+  // TT Bar
+  ttBarChart = new Chart(document.getElementById('ttBarChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Vid 1', 'Vid 2', 'Vid 3', 'Vid 4', 'Vid 5', 'Vid 6'],
+      datasets: [{
+        label: 'Views',
+        data: [0, 0, 0, 0, 0, 0],
+        backgroundColor: ['#69C9D0', '#69C9D0', '#69C9D0', '#69C9D0', '#69C9D0', '#69C9D0'],
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: '#2A2A2A' }, ticks: { color: '#888' } },
+        y: { grid: { color: '#2A2A2A' }, ticks: { color: '#888', callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'k' : v } }
+      }
+    }
+  });
+
+  // TLDR Comparison bar
+  tldrCompChart = new Chart(document.getElementById('tldrCompChart'), {
+    type: 'bar',
+    data: {
+      labels: ['IG Alcance', 'IG Views', 'TT Views', 'IG Seg.', 'TT Seg.'],
+      datasets: [
+        { label: 'Mes actual', data: [0,0,0,0,0], backgroundColor: '#E1306C', borderRadius: 4, borderSkipped: false },
+        { label: 'Mes anterior', data: [0,0,0,0,0], backgroundColor: '#444', borderRadius: 4, borderSkipped: false }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: '#2A2A2A' }, ticks: { color: '#888', maxRotation: 30 } },
+        y: { grid: { color: '#2A2A2A' }, ticks: { color: '#888', callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'k' : v } }
+      }
+    }
+  });
+}
+
+function updateIgPieChart() {
+  const reels = Math.min(100, Math.max(0, parseFloat(document.getElementById('ig-pct-reels').value) || 0));
+  const feed = Math.min(100 - reels, Math.max(0, parseFloat(document.getElementById('ig-pct-feed').value) || 0));
+  const stories = Math.max(0, 100 - reels - feed);
+  if (igPieChart) {
+    igPieChart.data.datasets[0].data = [reels, feed, Math.round(stories)];
+    igPieChart.update('none');
+  }
+}
+
+function updateIgWeekChart() {
+  if (!igWeekChart) return;
+  igWeekChart.data.datasets[0].data = [
+    parseFloat(document.getElementById('ig-sem1').value) || 0,
+    parseFloat(document.getElementById('ig-sem2').value) || 0,
+    parseFloat(document.getElementById('ig-sem3').value) || 0,
+    parseFloat(document.getElementById('ig-sem4').value) || 0
+  ];
+  igWeekChart.update('none');
+}
+
+function updateTTChart() {
+  if (!ttBarChart) return;
+  ttBarChart.data.datasets[0].data = [
+    parseFloat(document.getElementById('tt-v1').value) || 0,
+    parseFloat(document.getElementById('tt-v2').value) || 0,
+    parseFloat(document.getElementById('tt-v3').value) || 0,
+    parseFloat(document.getElementById('tt-v4').value) || 0,
+    parseFloat(document.getElementById('tt-v5').value) || 0,
+    parseFloat(document.getElementById('tt-v6').value) || 0
+  ];
+  ttBarChart.update('none');
+}
+
+function updateTLDRChart() {
+  if (!tldrCompChart) return;
+  const get = id => parseFloat(document.getElementById(id)?.value) || 0;
+  tldrCompChart.data.datasets[0].data = [get('ig-alcance-act'), get('ig-views-act'), get('tt-views-act'), get('ig-seg-act'), get('tt-seg-act')];
+  tldrCompChart.data.datasets[1].data = [get('ig-alcance-prev'), get('ig-views-prev'), get('tt-views-prev'), get('ig-seg-prev'), get('tt-seg-prev')];
+  tldrCompChart.update('none');
+}
+
+function updateTLDR() {
+  const get = id => parseFloat(document.getElementById(id)?.value) || 0;
+  const getStr = id => document.getElementById(id)?.value || '';
+
+  document.getElementById('tldr-ig-alcance').textContent = fmtNum(get('ig-alcance-act'));
+  document.getElementById('tldr-ig-views').textContent = fmtNum(get('ig-views-act'));
+  document.getElementById('tldr-ig-seg').textContent = fmtNum(get('ig-seg-act'));
+  document.getElementById('tldr-tt-views').textContent = fmtNum(get('tt-views-act'));
+  document.getElementById('tldr-tt-seg').textContent = fmtNum(get('tt-seg-act'));
+
+  const d1 = delta(get('ig-alcance-act'), get('ig-alcance-prev'));
+  const d2 = delta(get('ig-seg-act'), get('ig-seg-prev'));
+  const d3 = delta(get('tt-views-act'), get('tt-views-prev'));
+  const d4 = delta(get('tt-seg-act'), get('tt-seg-prev'));
+
+  const setTldrDelta = (id, d) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = fmtDelta(d);
+    el.style.color = d === null ? '#888' : parseFloat(d) >= 0 ? 'var(--pos)' : 'var(--neg)';
+  };
+  setTldrDelta('tldr-ig-alcance-delta', d1);
+  setTldrDelta('tldr-ig-seg-delta', d2);
+  setTldrDelta('tldr-tt-views-delta', d3);
+  setTldrDelta('tldr-tt-seg-delta', d4);
+
+  const conclusion = getStr('conclusion-mes');
+  const conclusionEl = document.getElementById('tldr-conclusion-display');
+  conclusionEl.innerHTML = conclusion ? conclusion : '<em style="color:var(--gray-3)">Completá la conclusión en la Hoja 2.</em>';
+
+  document.getElementById('tldr-ig-formato').textContent = getStr('ig-formato-fuerte') || '—';
+  document.getElementById('tldr-tt-formato').textContent = getStr('tt-formato-fuerte') || '—';
+}
+
+// Listen for conclusion updates
+document.getElementById('conclusion-mes').addEventListener('input', updateTLDR);
+document.getElementById('ig-formato-fuerte').addEventListener('input', updateTLDR);
+document.getElementById('tt-formato-fuerte').addEventListener('input', updateTLDR);
+document.getElementById('ig-guardados-act').addEventListener('input', updateIgDetails);
+document.getElementById('ig-inter-act').addEventListener('input', updateIgDetails);
+document.getElementById('ig-alcance-act').addEventListener('input', () => { calcAlcance(); updateIgDetails(); calcTTAvg(); });
+document.getElementById('tt-views-act').addEventListener('input', calcTTAvg);
+
+window.addEventListener('load', () => {
+  initCharts();
+  goTo(1);
+});
+</script>
+</body>
+</html>
