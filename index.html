@@ -8,10 +8,7 @@
 <title>Reporte Mensual — Bananas Agency</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<!-- Librerías para Gráficos y Exportación PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   :root {
     --black: #0A0A0A;
@@ -78,7 +75,6 @@
     display: flex; align-items: center; justify-content: center;
   }
   .top-action-btn:hover { background: var(--gray-3); }
-  .top-action-btn:disabled { opacity: 0.5; cursor: wait; }
 
   /* PAGE TABS */
   #pagetabs {
@@ -189,14 +185,44 @@
   .tldr-label { font-size: 13px; color: var(--gray-5); }
   .tldr-value { font-family: var(--mono); font-size: 16px; font-weight: 500; }
 
-  /* COVER */
-  .cover-logo { width: 64px; height: 64px; border-radius: 16px; background: var(--yellow); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 20px; font-weight: 500; color: #0A0A0A; margin-bottom: 24px; overflow: hidden; }
-  .cover-logo img { width: 100%; height: 100%; object-fit: cover; }
+  /* COVER LOGO (Responsive Text/Image) */
+  .cover-logo { 
+    width: fit-content; 
+    min-width: 64px; 
+    height: fit-content;
+    min-height: 64px;
+    max-width: 100%;
+    padding: 12px 24px;
+    border-radius: 16px; 
+    background: var(--yellow); 
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-family: var(--mono); 
+    font-size: 24px; 
+    font-weight: 500; 
+    color: #0A0A0A; 
+    margin-bottom: 24px; 
+    overflow: hidden; 
+    transition: all 0.2s;
+  }
+  .cover-logo.has-image {
+    padding: 0;
+    background: transparent;
+  }
+  .cover-logo img { 
+    width: 100%; 
+    height: auto;
+    max-height: 160px; /* Previene que suban una foto gigante y ocupe todo */
+    object-fit: contain; 
+    display: block;
+  }
+  
   .cover-agency { font-family: var(--mono); font-size: 11px; color: var(--yellow); letter-spacing: 0.15em; margin-bottom: 8px; }
   .cover-title { font-size: 28px; font-weight: 600; line-height: 1.2; margin-bottom: 8px; }
   .cover-meta { font-size: 14px; color: var(--gray-4); font-family: var(--mono); }
   .cover-divider { border: none; border-top: 1px solid var(--gray-2); margin: 24px 0; transition: border-color 0.2s; }
-  .cover-client-name { font-size: 32px; font-weight: 600; }
+  .cover-client-name { font-size: 32px; font-weight: 600; line-height: 1.1; }
   .cover-client-sub { font-size: 13px; color: var(--gray-4); margin-top: 4px; }
 
   /* BOTTOM NAV */
@@ -222,6 +248,75 @@
   /* UTIL */
   .conclusion-box { background: rgba(245,200,66,0.08); border: 1px solid rgba(245,200,66,0.2); border-radius: 10px; padding: 14px; font-size: 14px; line-height: 1.6; color: var(--gray-5); margin: 12px 0; }
   .conclusion-box strong { color: var(--yellow); font-weight: 500; }
+
+  /* ========================================================= */
+  /* 🖨️ PDF VECTORIAL NATIVO (SIN CAPTURAS, SOLO TEXTO PURO) */
+  /* ========================================================= */
+  @media print {
+    @page { 
+      /* Proporción 1080px (ancho) adaptable a pantallas verticales */
+      size: 1080px 1920px; 
+      margin: 0 !important; 
+    }
+    
+    html, body { 
+      background-color: var(--black) !important; 
+      color: var(--white) !important; 
+      margin: 0 !important; 
+      padding: 0 !important; 
+      -webkit-print-color-adjust: exact !important; 
+      print-color-adjust: exact !important; 
+    }
+    
+    /* Ocultar elementos de UI */
+    #topbar, #pagetabs, #bottom-nav, #logo-upload-group, #logo-text-group { display: none !important; }
+    
+    #app { 
+      max-width: 1000px !important; 
+      width: 100% !important; 
+      margin: 0 auto !important; 
+      padding: 0 !important; 
+    }
+    
+    /* Estructura estricta de 11 hojas */
+    .page { 
+      display: block !important; 
+      page-break-after: always !important; 
+      page-break-inside: avoid !important;
+      padding: 60px 50px !important; /* Margen virtual interno */
+      min-height: 100vh !important;
+      margin: 0 !important;
+      opacity: 1 !important;
+      transform: none !important;
+      animation: none !important;
+    }
+    .page:last-child { page-break-after: auto !important; }
+    
+    /* Convertir inputs y textareas en texto plano visualmente */
+    .field-input { 
+      border: none !important; 
+      background: transparent !important; 
+      color: var(--white) !important; 
+      padding: 0 !important; 
+      resize: none !important;
+    }
+    textarea.field-input { height: auto !important; overflow: visible !important; }
+    
+    /* Esconder placeholders vacíos en el PDF final */
+    ::-webkit-input-placeholder { color: transparent !important; }
+    :-moz-placeholder { color: transparent !important; }
+    ::-moz-placeholder { color: transparent !important; }
+    :-ms-input-placeholder { color: transparent !important; }
+
+    /* Forzar visibilidad de fondos de tarjetas en el PDF */
+    .card, .metric, .content-card, .tldr-stat, .conclusion-box {
+      border: 1px solid var(--gray-2) !important;
+    }
+    .metric { background-color: var(--gray-2) !important; }
+    .content-card { background-color: var(--gray-2) !important; border-left: 3px solid var(--yellow) !important; }
+    
+    .chart-wrap { page-break-inside: avoid !important; }
+  }
 </style>
 </head>
 <body>
@@ -234,7 +329,7 @@
       <input class="meta-input" id="client-name-input" type="text" placeholder="Cliente" value="Cliente">
       <input class="meta-input" id="month-input" type="month" value="">
       <button class="top-action-btn" id="theme-btn" onclick="toggleTheme()" title="Cambiar tema">☀️</button>
-      <button class="top-action-btn" id="pdf-btn" onclick="exportToPDF()" title="Exportar reporte de 11 hojas a PDF">📄 PDF</button>
+      <button class="top-action-btn" onclick="exportToPDF()" title="Exportar reporte vectorizado (11 hojas)">📄 PDF</button>
     </div>
   </div>
 
@@ -243,7 +338,7 @@
 
   <!-- PAGE 1 — PORTADA -->
   <div class="page active" id="page-1">
-    <br>
+    <br><br>
     <div class="cover-logo" id="cover-logo-display">BA</div>
     <div class="cover-agency">Bananas Agency</div>
     <div class="cover-title">Reporte Mensual</div>
@@ -254,7 +349,7 @@
     <hr class="cover-divider">
     
     <div class="field-group" id="logo-upload-group">
-      <label class="field-label">Subir Logo (Reemplaza al texto)</label>
+      <label class="field-label">Subir Logo (Reemplaza al texto y se ajusta al ancho)</label>
       <input class="field-input" type="file" id="client-logo-upload" accept="image/*">
       <button class="btn-remove-logo" id="btn-remove-logo" onclick="removeLogo()">Quitar imagen</button>
     </div>
@@ -912,7 +1007,7 @@ logoInput.addEventListener('change', function(e) {
     const reader = new FileReader();
     reader.onload = function(evt) {
       logoDisplay.innerHTML = `<img src="${evt.target.result}" alt="Logo Cliente">`;
-      logoDisplay.style.background = 'transparent';
+      logoDisplay.classList.add('has-image');
       btnRemoveLogo.style.display = 'inline-block';
     };
     reader.readAsDataURL(file);
@@ -922,14 +1017,14 @@ logoInput.addEventListener('change', function(e) {
 function removeLogo() {
   logoInput.value = '';
   logoDisplay.innerHTML = logoText.value || 'BA';
-  logoDisplay.style.background = 'var(--yellow)';
+  logoDisplay.classList.remove('has-image');
   btnRemoveLogo.style.display = 'none';
 }
 
 function updateLogoText(val) {
   if (!logoInput.files || logoInput.files.length === 0) {
     logoDisplay.innerHTML = val || 'BA';
-    logoDisplay.style.background = 'var(--yellow)';
+    logoDisplay.classList.remove('has-image');
   }
 }
 
@@ -1201,96 +1296,23 @@ document.getElementById('ig-inter-act').addEventListener('input', updateIgDetail
 document.getElementById('ig-alcance-act').addEventListener('input', () => { calcAlcance(); updateIgDetails(); calcTTAvg(); });
 document.getElementById('tt-views-act').addEventListener('input', calcTTAvg);
 
-// --- NUEVA LÓGICA DE EXPORTACIÓN PDF ---
-async function exportToPDF() {
-  const btn = document.getElementById('pdf-btn');
-  const originalText = btn.innerHTML;
-  btn.innerHTML = '⏳ Gen...';
-  btn.disabled = true;
 
-  try {
-    const { jsPDF } = window.jspdf;
-    // Creamos el doc, tamaño en px reales (esto nos permite crear hojas de tamaño variable según cada captura)
-    const pdf = new jsPDF({ unit: 'px', orientation: 'portrait' });
-    pdf.deletePage(1); // Borrar página vacía por defecto
-
-    // Esconder barras de navegación (sin márgenes ni UI extra)
-    document.getElementById('topbar').style.display = 'none';
-    document.getElementById('pagetabs').style.display = 'none';
-    document.getElementById('bottom-nav').style.display = 'none';
-
-    // Esconder inputs de configuración de logo en la Portada para que no salgan impresos
-    const logoUploadGrp = document.getElementById('logo-upload-group');
-    const logoTextGrp = document.getElementById('logo-text-group');
-    if(logoUploadGrp) logoUploadGrp.style.display = 'none';
-    if(logoTextGrp) logoTextGrp.style.display = 'none';
-
-    // Forzar redimensionado de textareas para que no haya textos cortados ni scrollbars
-    document.querySelectorAll('textarea').forEach(el => {
-      el.style.height = 'auto';
-      el.style.height = el.scrollHeight + 'px';
-    });
-
-    window.scrollTo(0, 0); // Evitar desplazamientos extraños en html2canvas
-
-    // Iterar por cada una de las 11 páginas
-    for (let i = 1; i <= PAGES; i++) {
-      btn.innerHTML = `⏳ ${i}/${PAGES}`;
-      
-      // Mostrar solo la página que queremos capturar
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      const pageEl = document.getElementById('page-' + i);
-      pageEl.classList.add('active');
-      
-      // Ajustamos el padding para el PDF (como si fuera un margen limpio de lectura virtual)
-      const originalPadding = pageEl.style.padding;
-      pageEl.style.padding = '40px 24px';
-      
-      // Pequeña pausa para asegurar la renderización de fuentes y de los gráficos de Chart.js
-      await new Promise(r => setTimeout(r, 150));
-
-      // Capturamos el html convertido en un canvas (Scale 2.25 sobre 480px = ~1080px reales de ancho de imagen)
-      const canvas = await html2canvas(pageEl, {
-        scale: 2.25, 
-        useCORS: true,
-        backgroundColor: isLightMode ? '#F5F2EC' : '#0A0A0A',
-        logging: false
-      });
-
-      // Dimensiones originales para jsPDF (para que mantenga la proporción 1:1 con el contenedor)
-      const w = pageEl.offsetWidth;
-      const h = pageEl.offsetHeight; // <-- Aquí se adapta al "largo necesario" de tu contenido
-
-      pdf.addPage([w, h], w > h ? 'landscape' : 'portrait');
-      pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, w, h);
-
-      // Restauramos padding
-      pageEl.style.padding = originalPadding;
-    }
-
-    btn.innerHTML = '⏳ Guardando';
-    const clientName = document.getElementById('client-name-input').value || 'Reporte';
-    const month = document.getElementById('month-input').value || 'Mes';
-    pdf.save(`${clientName} - ${month}.pdf`);
-
-  } catch (e) {
-    console.error(e);
-    alert('Hubo un error al generar el PDF. Verifica que la imagen subida sea válida e intenta nuevamente.');
-  } finally {
-    // Restauramos toda la UI visible para el usuario
-    document.getElementById('topbar').style.display = 'flex';
-    document.getElementById('pagetabs').style.display = 'flex';
-    document.getElementById('bottom-nav').style.display = 'flex';
-    
-    const logoUploadGrp = document.getElementById('logo-upload-group');
-    const logoTextGrp = document.getElementById('logo-text-group');
-    if(logoUploadGrp) logoUploadGrp.style.display = 'block';
-    if(logoTextGrp) logoTextGrp.style.display = 'block';
-
-    goTo(currentPage); // Volver a la pestaña donde estábamos
-    btn.innerHTML = originalText;
-    btn.disabled = false;
-  }
+// --- PDF NATIVO ---
+function exportToPDF() {
+  // Asegurarnos de que todos los textareas tengan la altura exacta de su contenido
+  // para que el texto nunca se corte al imprimir.
+  document.querySelectorAll('textarea').forEach(el => {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  });
+  
+  // Al invocar window.print() junto con nuestra regla @media print que definimos arriba:
+  // 1. Cada "Página" se rompe a una nueva hoja (`page-break-after: always`).
+  // 2. Ocultamos automáticamente barras y botones.
+  // 3. Forzamos el ancho a la medida digital (`@page { size: 1080px 1920px; }` en navegadores compatibles).
+  // 4. Transformamos las cajas de input/textarea en texto plano (sin bordes).
+  // Y lo más importante: Se guarda TODO de forma VECTORIAL con calidad inmejorable.
+  window.print();
 }
 
 window.addEventListener('load', () => {
