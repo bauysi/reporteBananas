@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0A0A0A">
 <title>Reporte Mensual — Bananas Agency</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   :root {
@@ -18,15 +18,16 @@
     --gray-1: #1A1A1A;
     --gray-2: #2A2A2A;
     --gray-3: #444;
-    --gray-4: #888;
-    --gray-5: #BBB;
+    --gray-4: #A1A1AA; /* Gris más claro para mejorar contraste en etiquetas */
+    --gray-5: #E4E4E7; /* Gris casi blanco para textos secundarios */
     --ig: #E1306C;
     --tt: #010101;
-    --tt-accent: #69C9D0;
-    --pos: #22C55E;
-    --neg: #EF4444;
-    --font: 'DM Sans', sans-serif;
-    --mono: 'DM Mono', monospace;
+    --tt-accent: #00D0FF; /* Azul eléctrico brillante */
+    --pos: #4ADE80; /* Verde más brillante y legible en fondos oscuros */
+    --neg: #F87171; /* Rojo más brillante y legible en fondos oscuros */
+    --font: 'Inter', sans-serif;
+    --title-font: 'Anton', sans-serif;
+    --num-font: 'Space Grotesk', sans-serif;
     --r: 12px;
   }
 
@@ -34,11 +35,17 @@
   [data-theme="light"] {
     --black: #F5F2EC;
     --white: #0A0A0A;
+    --yellow: #C27803; /* Dorado/Amarillo oscuro para verse bien sobre blanco */
+    --yellow-dark: #925A02;
     --gray-1: #FFFFFF;
-    --gray-2: #E5E5E5;
-    --gray-3: #CCCCCC;
-    --gray-4: #666666;
-    --gray-5: #333333;
+    --gray-2: #F4F4F5;
+    --gray-3: #D4D4D8;
+    --gray-4: #52525B; /* Gris oscuro para etiquetas */
+    --gray-5: #27272A; /* Gris casi negro para subtextos */
+    --pos: #16A34A; /* Verde más profundo para contraste sobre blanco */
+    --neg: #DC2626; /* Rojo más intenso para contraste sobre blanco */
+    --ig: #BE185D; /* Fucsia oscurecido */
+    --tt-accent: #0066FF; /* Azul eléctrico intenso para contraste sobre blanco */
     --theme-color: #F5F2EC;
   }
 
@@ -57,11 +64,11 @@
     display: flex; align-items: center; justify-content: space-between; gap: 8px;
     transition: background 0.2s;
   }
-  #topbar .brand { font-family: var(--mono); font-size: 11px; color: var(--yellow); letter-spacing: 0.12em; text-transform: uppercase; }
+  #topbar .brand { font-family: var(--title-font); font-size: 16px; font-weight: 400; color: var(--yellow); letter-spacing: 0.05em; text-transform: uppercase; }
   #meta-row { display: flex; align-items: center; gap: 8px; }
   .meta-input {
     background: var(--gray-2); border: none; border-radius: 6px;
-    color: var(--white); font-family: var(--mono); font-size: 11px;
+    color: var(--white); font-family: var(--font); font-weight: 500; font-size: 11px;
     padding: 5px 8px; outline: none; width: 100px;
     transition: background 0.2s, color 0.2s;
   }
@@ -70,11 +77,12 @@
 
   .top-action-btn {
     background: var(--gray-2); border: none; border-radius: 6px;
-    color: var(--white); font-family: var(--font); font-size: 14px;
+    color: var(--white); font-family: var(--font); font-size: 14px; font-weight: 500;
     padding: 4px 8px; cursor: pointer; transition: background 0.15s;
     display: flex; align-items: center; justify-content: center;
   }
   .top-action-btn:hover { background: var(--gray-3); }
+  .top-action-btn:disabled { opacity: 0.5; cursor: wait; }
 
   /* PAGE TABS */
   #pagetabs {
@@ -88,11 +96,11 @@
     flex-shrink: 0; padding: 6px 12px;
     border: 1px solid var(--gray-3); border-radius: 20px;
     background: none; color: var(--gray-4);
-    font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em;
+    font-family: var(--font); font-weight: 500; font-size: 11px; letter-spacing: 0.02em;
     cursor: pointer; transition: all 0.15s;
     white-space: nowrap;
   }
-  .tab-btn.active { background: var(--yellow); border-color: var(--yellow); color: #0A0A0A; font-weight: 500; }
+  .tab-btn.active { background: var(--yellow); border-color: var(--yellow); color: #0A0A0A; font-weight: 600; }
   [data-theme="light"] .tab-btn.active { color: #0A0A0A; }
 
   /* PAGES */
@@ -101,9 +109,9 @@
   @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
   /* TYPOGRAPHY */
-  .page-label { font-family: var(--mono); font-size: 10px; color: var(--yellow); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
-  .page-title { font-size: 22px; font-weight: 600; line-height: 1.2; margin-bottom: 20px; }
-  .section-title { font-size: 12px; font-weight: 500; color: var(--gray-4); text-transform: uppercase; letter-spacing: 0.1em; margin: 24px 0 12px; border-top: 1px solid var(--gray-2); padding-top: 16px; }
+  .page-label { font-family: var(--num-font); font-size: 11px; font-weight: 600; color: var(--yellow); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+  .page-title { font-family: var(--title-font); font-size: 30px; font-weight: 400; line-height: 1.1; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 0.02em; }
+  .section-title { font-family: var(--title-font); font-size: 18px; font-weight: 400; color: var(--gray-4); text-transform: uppercase; letter-spacing: 0.05em; margin: 32px 0 16px; border-top: 1px solid var(--gray-2); padding-top: 16px; }
   .section-title:first-of-type { margin-top: 0; border: none; padding: 0; }
 
   /* CARDS */
@@ -113,40 +121,40 @@
 
   /* METRIC CARDS */
   .metric { background: var(--gray-2); border-radius: 10px; padding: 12px 14px; transition: background 0.2s; }
-  .metric-label { font-size: 11px; color: var(--gray-4); margin-bottom: 6px; font-family: var(--mono); }
-  .metric-value { font-size: 22px; font-weight: 600; line-height: 1; }
-  .metric-delta { font-size: 12px; margin-top: 4px; font-family: var(--mono); }
+  .metric-label { font-size: 12px; font-weight: 500; color: var(--gray-4); margin-bottom: 6px; font-family: var(--font); }
+  .metric-value { font-family: var(--num-font); font-size: 28px; font-weight: 700; line-height: 1; }
+  .metric-delta { font-family: var(--num-font); font-size: 14px; font-weight: 600; margin-top: 6px; }
   .pos { color: var(--pos); }
   .neg { color: var(--neg); }
   .neutral { color: var(--gray-4); }
 
   /* INPUTS */
   .field-group { margin-bottom: 14px; }
-  .field-label { font-size: 11px; color: var(--gray-4); margin-bottom: 5px; font-family: var(--mono); display: block; }
+  .field-label { font-size: 12px; font-weight: 600; color: var(--gray-4); margin-bottom: 5px; font-family: var(--font); display: block; }
   .field-input {
     width: 100%; background: var(--gray-2); border: 1px solid var(--gray-3);
     border-radius: 8px; color: var(--white); font-family: var(--font); font-size: 15px;
     padding: 10px 12px; outline: none; transition: border 0.15s, background 0.2s, color 0.2s;
   }
   .field-input:focus { border-color: var(--yellow); }
-  .field-input.number-input { font-family: var(--mono); font-size: 18px; }
+  .field-input.number-input { font-family: var(--num-font); font-size: 20px; font-weight: 600; }
   .field-input[type="number"] { -moz-appearance: textfield; }
   .field-input[type="number"]::-webkit-outer-spin-button,
   .field-input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
   .field-input[type="file"] { font-size: 12px; padding: 8px; }
   textarea.field-input { resize: vertical; min-height: 80px; line-height: 1.5; font-size: 14px; overflow: hidden; }
 
-  .btn-remove-logo { margin-top: 6px; font-size: 11px; font-family: var(--mono); background: none; border: 1px solid var(--gray-3); color: var(--neg); padding: 4px 8px; border-radius: 4px; cursor: pointer; display: none; }
+  .btn-remove-logo { margin-top: 6px; font-size: 12px; font-family: var(--font); font-weight: 500; background: none; border: 1px solid var(--gray-3); color: var(--neg); padding: 4px 8px; border-radius: 4px; cursor: pointer; display: none; }
 
   /* PLATFORM BADGES */
   .platform-badge {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 4px 10px; border-radius: 20px;
-    font-size: 11px; font-weight: 500; font-family: var(--mono);
+    font-family: var(--num-font); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
     margin-bottom: 16px;
   }
   .badge-ig { background: rgba(225,48,108,0.15); color: var(--ig); border: 1px solid rgba(225,48,108,0.3); }
-  .badge-tt { background: rgba(105,201,208,0.1); color: var(--tt-accent); border: 1px solid rgba(105,201,208,0.3); }
+  .badge-tt { background: rgba(0,208,255,0.1); color: var(--tt-accent); border: 1px solid rgba(0,208,255,0.3); }
 
   /* CHART WRAP */
   .chart-wrap { position: relative; width: 100%; height: 220px; margin: 12px 0; }
@@ -154,36 +162,36 @@
 
   /* COMPARISON TABLE */
   .comp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .comp-table th { font-family: var(--mono); font-size: 10px; color: var(--gray-4); text-align: left; padding: 8px 4px; border-bottom: 1px solid var(--gray-2); }
+  .comp-table th { font-family: var(--font); font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--gray-4); text-align: left; padding: 8px 4px; border-bottom: 1px solid var(--gray-2); }
   .comp-table td { padding: 10px 4px; border-bottom: 1px solid var(--gray-2); vertical-align: middle; }
   .comp-table tr:last-child td { border: none; }
   .comp-table .metric-name { color: var(--gray-5); font-size: 12px; }
-  .comp-table .val { font-family: var(--mono); font-size: 14px; font-weight: 500; }
-  .comp-table .delta-cell { font-family: var(--mono); font-size: 12px; }
+  .comp-table .val { font-family: var(--num-font); font-size: 15px; font-weight: 600; }
+  .comp-table .delta-cell { font-family: var(--num-font); font-size: 14px; font-weight: 700; }
 
   /* TOP CONTENT CARDS */
   .content-card { background: var(--gray-2); border-radius: 10px; padding: 14px; margin-bottom: 10px; border-left: 3px solid var(--yellow); transition: background 0.2s; }
-  .content-rank { font-family: var(--mono); font-size: 10px; color: var(--yellow); margin-bottom: 6px; }
+  .content-rank { font-family: var(--title-font); font-size: 16px; font-weight: 400; color: var(--yellow); margin-bottom: 6px; letter-spacing: 0.05em; }
   .content-title { font-size: 14px; font-weight: 500; margin-bottom: 8px; }
   .content-stats { display: flex; gap: 12px; flex-wrap: wrap; }
-  .content-stat { font-family: var(--mono); font-size: 11px; color: var(--gray-4); }
+  .content-stat { font-family: var(--num-font); font-weight: 500; font-size: 11px; color: var(--gray-4); }
   .content-stat span { color: var(--white); }
   .content-reason { font-size: 12px; color: var(--gray-4); margin-top: 8px; line-height: 1.5; }
 
   /* PLAN BLOCKS */
   .plan-block { margin-bottom: 16px; }
-  .plan-type { font-family: var(--mono); font-size: 10px; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-bottom: 10px; }
+  .plan-type { font-family: var(--num-font); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-bottom: 10px; }
   .plan-mantener { background: rgba(34,197,94,0.15); color: var(--pos); }
   .plan-mejorar { background: rgba(245,200,66,0.15); color: var(--yellow); }
-  .plan-testear { background: rgba(105,201,208,0.15); color: var(--tt-accent); }
+  .plan-testear { background: rgba(0,208,255,0.15); color: var(--tt-accent); }
   .plan-item { font-size: 14px; color: var(--gray-5); padding: 6px 0; border-bottom: 1px solid var(--gray-2); display: flex; align-items: flex-start; gap: 8px; }
   .plan-item:last-child { border: none; }
   .plan-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; margin-top: 7px; flex-shrink: 0; }
 
   /* TLDR */
   .tldr-stat { background: var(--gray-1); border: 1px solid var(--gray-2); border-radius: 10px; padding: 14px 16px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
-  .tldr-label { font-size: 13px; color: var(--gray-5); }
-  .tldr-value { font-family: var(--mono); font-size: 16px; font-weight: 500; }
+  .tldr-label { font-size: 13px; color: var(--gray-5); font-family: var(--font); font-weight: 500; }
+  .tldr-value { font-family: var(--num-font); font-size: 20px; font-weight: 700; }
 
   /* COVER LOGO (Responsive Text/Image) */
   .cover-logo { 
@@ -198,9 +206,9 @@
     display: inline-flex; 
     align-items: center; 
     justify-content: center; 
-    font-family: var(--mono); 
-    font-size: 24px; 
-    font-weight: 500; 
+    font-family: var(--title-font); 
+    font-size: 36px; 
+    font-weight: 400; 
     color: #0A0A0A; 
     margin-bottom: 24px; 
     overflow: hidden; 
@@ -218,12 +226,12 @@
     display: block;
   }
   
-  .cover-agency { font-family: var(--mono); font-size: 11px; color: var(--yellow); letter-spacing: 0.15em; margin-bottom: 8px; }
-  .cover-title { font-size: 28px; font-weight: 600; line-height: 1.2; margin-bottom: 8px; }
-  .cover-meta { font-size: 14px; color: var(--gray-4); font-family: var(--mono); }
+  .cover-agency { font-family: var(--num-font); font-size: 12px; font-weight: 600; color: var(--yellow); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; }
+  .cover-title { font-family: var(--title-font); font-size: 38px; font-weight: 400; text-transform: uppercase; line-height: 1.1; margin-bottom: 12px; }
+  .cover-meta { font-family: var(--num-font); font-weight: 500; font-size: 15px; color: var(--gray-4); }
   .cover-divider { border: none; border-top: 1px solid var(--gray-2); margin: 24px 0; transition: border-color 0.2s; }
-  .cover-client-name { font-size: 32px; font-weight: 600; line-height: 1.1; }
-  .cover-client-sub { font-size: 13px; color: var(--gray-4); margin-top: 4px; }
+  .cover-client-name { font-family: var(--font); font-size: 42px; font-weight: 600; line-height: 1.1; letter-spacing: -0.02em; }
+  .cover-client-sub { font-size: 13px; color: var(--gray-4); margin-top: 4px; font-family: var(--font); }
 
   /* BOTTOM NAV */
   #bottom-nav {
@@ -243,7 +251,7 @@
   }
   .nav-arrow:hover { background: var(--gray-3); }
   .nav-arrow:disabled { opacity: 0.3; cursor: default; }
-  #page-indicator { font-family: var(--mono); font-size: 11px; color: var(--gray-4); text-align: center; flex: 1; }
+  #page-indicator { font-family: var(--num-font); font-weight: 600; font-size: 13px; color: var(--gray-4); text-align: center; flex: 1; }
 
   /* UTIL */
   .conclusion-box { background: rgba(245,200,66,0.08); border: 1px solid rgba(245,200,66,0.2); border-radius: 10px; padding: 14px; font-size: 14px; line-height: 1.6; color: var(--gray-5); margin: 12px 0; }
@@ -876,11 +884,10 @@
     <div class="section-title">Cómo lo vamos a resolver</div>
     <textarea class="field-input" id="conclusion-plan" placeholder="Plan de acción concreto para el mes siguiente." rows="4" style="margin-bottom:16px;"></textarea>
 
-    <div class="section-title">Cierre</div>
-    <div class="card" style="text-align:center;padding:32px 20px;">
-      <div style="font-size:28px;margin-bottom:12px;">🍌</div>
-      <div style="font-size:16px;font-weight:500;margin-bottom:6px;">Muchas gracias por confiar en nosotros.</div>
-      <div style="font-size:13px;color:var(--gray-4);font-family:var(--mono);">Bananas Agency</div>
+    <div class="card" style="text-align:center;padding:32px 20px;border-color:var(--yellow);margin-top:32px;">
+      <div style="font-size:32px;margin-bottom:12px;">🍌</div>
+      <div style="font-size:16px;font-weight:700;color:var(--white);margin-bottom:6px;">Muchas gracias por confiar en nosotros.</div>
+      <div style="font-size:24px;color:var(--yellow);font-family:var(--title-font);letter-spacing:-0.02em;text-transform:uppercase;">Bananas Agency</div>
     </div>
   </div>
 
@@ -1179,8 +1186,9 @@ let igPieChart, igWeekChart, ttBarChart, tldrCompChart;
 
 function initCharts() {
   Chart.defaults.color = '#888';
-  Chart.defaults.font.family = 'DM Mono, monospace';
-  Chart.defaults.font.size = 11;
+  Chart.defaults.font.family = '"Space Grotesk", sans-serif';
+  Chart.defaults.font.size = 12;
+  Chart.defaults.font.weight = '500';
 
   igPieChart = new Chart(document.getElementById('igPieChart'), {
     type: 'doughnut',
@@ -1210,7 +1218,7 @@ function initCharts() {
     type: 'bar',
     data: {
       labels: ['Vid 1', 'Vid 2', 'Vid 3', 'Vid 4', 'Vid 5', 'Vid 6'],
-      datasets: [{ label: 'Views', data: [0, 0, 0, 0, 0, 0], backgroundColor: ['#69C9D0', '#69C9D0', '#69C9D0', '#69C9D0', '#69C9D0', '#69C9D0'], borderRadius: 6, borderSkipped: false }]
+      datasets: [{ label: 'Views', data: [0, 0, 0, 0, 0, 0], backgroundColor: ['#00D0FF', '#00D0FF', '#00D0FF', '#00D0FF', '#00D0FF', '#00D0FF'], borderRadius: 6, borderSkipped: false }]
     },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#2A2A2A' }, ticks: { color: '#888' } }, y: { grid: { color: '#2A2A2A' }, ticks: { color: '#888', callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'k' : v } } } }
   });
