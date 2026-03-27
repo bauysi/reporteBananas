@@ -198,7 +198,7 @@
   .plan-mantener { background: rgba(34,197,94,0.15); color: var(--pos); }
   .plan-mejorar { background: rgba(249,203,66,0.15); color: var(--yellow); }
   .plan-testear { background: rgba(var(--tt-accent-rgb), 0.15); color: var(--tt-accent); }
-  .plan-item { font-size: 14px; color: var(--gray-5); padding: 6px 0; border-bottom: 1px solid var(--gray-2); display: flex; align-items: flex-start; gap: 8px; }
+  .plan-item { font-size: 14px; color: var(--gray-5); padding: 6px 0; border-bottom: 1px solid var(--gray-3); display: flex; align-items: flex-start; gap: 8px; }
   .plan-item:last-child { border: none; }
   .plan-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; margin-top: 7px; flex-shrink: 0; }
 
@@ -244,35 +244,47 @@
   /* 🖨️ PDF VECTORIAL NATIVO (SIN CAPTURAS, TEXTO PURO SELECCIONABLE) */
   /* ========================================================= */
   @media print {
-    /* Quitamos el forzado de tamaño para que el navegador use la hoja y deje que el contenido fluya libremente */
-    @page { margin: 0 !important; }
+    /* Anchura fija virtual de 1080px lograda mediante un zoom matemático desde los 480px nativos.
+       Altura "auto" para que el navegador dibuje un lienzo continuo, adaptado al contenido exacto. */
+    @page { margin: 0 !important; size: 1080px auto; }
     
     html, body { 
       background-color: var(--black) !important; color: var(--white) !important; 
-      margin: 0 !important; padding: 0 !important; 
+      margin: 0 !important; padding: 0 !important; height: auto !important; min-height: 100% !important; overflow: visible !important;
       -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; 
     }
     
     #topbar, #pagetabs, #bottom-nav, #logo-upload-group, #logo-text-group { display: none !important; }
     
-    #app { max-width: 480px !important; width: 100% !important; margin: 0 auto !important; padding: 0 !important; }
+    /* Escalamos el canvas al tamaño deseado sin romper la grilla */
+    #app { max-width: 480px !important; width: 480px !important; margin: 0 auto !important; padding: 32px !important; zoom: 2.25; }
     
-    /* Quitamos el 'page-break-after: always' para que la app se exporte como una sola infografía larga/continua adaptada al contenido */
+    /* Quitamos el 'page-break-after: always' para que la app se exporte como una sola infografía larga/continua o fluide dinámicamente */
     .page { 
       display: block !important; page-break-after: auto !important; page-break-inside: auto !important;
-      padding: 24px 24px !important; height: auto !important; overflow: visible !important; min-height: 0 !important;
+      padding: 16px 0 !important; height: auto !important; overflow: visible !important; min-height: 0 !important;
       margin: 0 !important; opacity: 1 !important; transform: none !important; animation: none !important;
     }
 
-    /* Ocultamos los campos originales y los vacíos */
+    /* Ocultamos los campos originales y los que quedaron vacíos */
     .hide-in-print, .hide-in-print-empty { display: none !important; }
+    .hide-in-print-temp { display: none !important; } /* Usado para ocultar info de cliente si hay logo */
+    #client-name-group { display: none !important; }
     
     /* Estilo para los textos clonados que reemplazan a los inputs */
     .print-fallback {
-      margin: 0 !important; white-space: pre-wrap !important;
+      margin: 0 !important; white-space: pre-wrap !important; box-sizing: border-box !important;
       word-wrap: break-word !important; overflow-wrap: break-word !important; outline: none !important; box-shadow: none !important;
     }
     div.print-fallback { display: block !important; width: 100% !important; height: auto !important; }
+
+    /* Estilo especial para los links en el PDF (Mini botón amarillo circular) */
+    .url-btn-fallback {
+      display: inline-flex !important; align-items: center !important; justify-content: center !important;
+      background: var(--yellow) !important; color: #0A0A0A !important;
+      border-radius: 50% !important; width: 28px !important; height: 28px !important;
+      text-decoration: none !important; font-size: 14px !important; margin-bottom: 8px !important;
+    }
 
     ::-webkit-input-placeholder { color: transparent !important; }
     :-moz-placeholder { color: transparent !important; }
@@ -283,7 +295,7 @@
     .metric { background-color: var(--gray-2) !important; }
     .content-card { background-color: var(--gray-2) !important; border-left: 3px solid var(--yellow) !important; }
     
-    /* Evitamos que tarjetas, bloques o gráficos se partan a la mitad entre hojas */
+    /* Evitamos que tarjetas, bloques o gráficos se partan a la mitad si la impresora corta la hoja */
     .card, .content-card, .chart-wrap, .metric, .plan-block {
         page-break-inside: avoid !important;
         break-inside: avoid !important;
@@ -307,7 +319,7 @@
       <button class="top-action-btn" onclick="triggerLoadJSON()" title="Cargar datos (JSON)">📂</button>
       <input type="file" id="json-upload" accept=".json" style="display:none">
       <button class="top-action-btn" id="theme-btn" onclick="toggleTheme()" title="Cambiar tema">☀️</button>
-      <button class="top-action-btn" onclick="exportToPDF()" title="Exportar reporte vectorizado (11 hojas)">📄 PDF</button>
+      <button class="top-action-btn" onclick="exportToPDF()" title="Exportar reporte vectorizado (Fluido/Continuo)">📄 PDF</button>
     </div>
   </div>
 
@@ -335,7 +347,7 @@
       </div>
     </div>
     
-    <div class="field-group">
+    <div class="field-group" id="client-name-group">
       <label class="field-label">Nombre completo del cliente</label>
       <input class="field-input" type="text" placeholder="Nombre del cliente" oninput="updateClientName(this.value)">
     </div>
@@ -402,114 +414,114 @@
     <div class="platform-badge badge-ig">Instagram</div>
     <div class="card-row">
       <div class="field-group">
-        <label class="field-label">Alcance total (actual)</label>
-        <input class="field-input number-input" type="number" id="ig-alcance-act" placeholder="0" oninput="calcDeltas()">
-      </div>
-      <div class="field-group">
         <label class="field-label">Alcance total (anterior)</label>
         <input class="field-input number-input" type="number" id="ig-alcance-prev" placeholder="0" oninput="calcDeltas()">
       </div>
+      <div class="field-group">
+        <label class="field-label">Alcance total (actual)</label>
+        <input class="field-input number-input" type="number" id="ig-alcance-act" placeholder="0" oninput="calcDeltas()">
+      </div>
     </div>
     <div class="card-row">
-      <div class="field-group">
-        <label class="field-label">Interacciones (actual)</label>
-        <input class="field-input number-input" type="number" id="ig-inter-act" placeholder="0" oninput="calcDeltas()">
-      </div>
       <div class="field-group">
         <label class="field-label">Interacciones (anterior)</label>
         <input class="field-input number-input" type="number" id="ig-inter-prev" placeholder="0" oninput="calcDeltas()">
       </div>
+      <div class="field-group">
+        <label class="field-label">Interacciones (actual)</label>
+        <input class="field-input number-input" type="number" id="ig-inter-act" placeholder="0" oninput="calcDeltas()">
+      </div>
     </div>
     <div class="card-row">
-      <div class="field-group">
-        <label class="field-label">Views reels (actual)</label>
-        <input class="field-input number-input" type="number" id="ig-views-act" placeholder="0" oninput="calcDeltas()">
-      </div>
       <div class="field-group">
         <label class="field-label">Views reels (anterior)</label>
         <input class="field-input number-input" type="number" id="ig-views-prev" placeholder="0" oninput="calcDeltas()">
       </div>
+      <div class="field-group">
+        <label class="field-label">Views reels (actual)</label>
+        <input class="field-input number-input" type="number" id="ig-views-act" placeholder="0" oninput="calcDeltas()">
+      </div>
     </div>
     <div class="card-row">
-      <div class="field-group">
-        <label class="field-label">Guardados (actual)</label>
-        <input class="field-input number-input" type="number" id="ig-guardados-act" placeholder="0" oninput="calcDeltas()">
-      </div>
       <div class="field-group">
         <label class="field-label">Guardados (anterior)</label>
         <input class="field-input number-input" type="number" id="ig-guardados-prev" placeholder="0" oninput="calcDeltas()">
       </div>
+      <div class="field-group">
+        <label class="field-label">Guardados (actual)</label>
+        <input class="field-input number-input" type="number" id="ig-guardados-act" placeholder="0" oninput="calcDeltas()">
+      </div>
     </div>
     <div class="card-row">
-      <div class="field-group">
-        <label class="field-label">Compartidos (actual)</label>
-        <input class="field-input number-input" type="number" id="ig-comp-act" placeholder="0" oninput="calcDeltas()">
-      </div>
       <div class="field-group">
         <label class="field-label">Compartidos (anterior)</label>
         <input class="field-input number-input" type="number" id="ig-comp-prev" placeholder="0" oninput="calcDeltas()">
       </div>
+      <div class="field-group">
+        <label class="field-label">Compartidos (actual)</label>
+        <input class="field-input number-input" type="number" id="ig-comp-act" placeholder="0" oninput="calcDeltas()">
+      </div>
     </div>
     <div class="card-row">
       <div class="field-group">
-        <label class="field-label">Seguidores nuevos (actual)</label>
-        <input class="field-input number-input" type="number" id="ig-seg-act" placeholder="0" oninput="calcDeltas()">
-      </div>
-      <div class="field-group">
         <label class="field-label">Seguidores nuevos (anterior)</label>
         <input class="field-input number-input" type="number" id="ig-seg-prev" placeholder="0" oninput="calcDeltas()">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Seguidores nuevos (actual)</label>
+        <input class="field-input number-input" type="number" id="ig-seg-act" placeholder="0" oninput="calcDeltas()">
       </div>
     </div>
 
     <div class="platform-badge badge-tt">TikTok</div>
     <div class="card-row">
       <div class="field-group">
-        <label class="field-label">Views totales (actual)</label>
-        <input class="field-input number-input" type="number" id="tt-views-act" placeholder="0" oninput="calcDeltas()">
-      </div>
-      <div class="field-group">
         <label class="field-label">Views totales (anterior)</label>
         <input class="field-input number-input" type="number" id="tt-views-prev" placeholder="0" oninput="calcDeltas()">
       </div>
+      <div class="field-group">
+        <label class="field-label">Views totales (actual)</label>
+        <input class="field-input number-input" type="number" id="tt-views-act" placeholder="0" oninput="calcDeltas()">
+      </div>
     </div>
     <div class="card-row">
-      <div class="field-group">
-        <label class="field-label">Likes (actual)</label>
-        <input class="field-input number-input" type="number" id="tt-likes-act" placeholder="0" oninput="calcDeltas()">
-      </div>
       <div class="field-group">
         <label class="field-label">Likes (anterior)</label>
         <input class="field-input number-input" type="number" id="tt-likes-prev" placeholder="0" oninput="calcDeltas()">
       </div>
+      <div class="field-group">
+        <label class="field-label">Likes (actual)</label>
+        <input class="field-input number-input" type="number" id="tt-likes-act" placeholder="0" oninput="calcDeltas()">
+      </div>
     </div>
     <div class="card-row">
-      <div class="field-group">
-        <label class="field-label">Comentarios (actual)</label>
-        <input class="field-input number-input" type="number" id="tt-com-act" placeholder="0" oninput="calcDeltas()">
-      </div>
       <div class="field-group">
         <label class="field-label">Comentarios (anterior)</label>
         <input class="field-input number-input" type="number" id="tt-com-prev" placeholder="0" oninput="calcDeltas()">
       </div>
+      <div class="field-group">
+        <label class="field-label">Comentarios (actual)</label>
+        <input class="field-input number-input" type="number" id="tt-com-act" placeholder="0" oninput="calcDeltas()">
+      </div>
     </div>
     <div class="card-row">
-      <div class="field-group">
-        <label class="field-label">Compartidos (actual)</label>
-        <input class="field-input number-input" type="number" id="tt-comp-act" placeholder="0" oninput="calcDeltas()">
-      </div>
       <div class="field-group">
         <label class="field-label">Compartidos (anterior)</label>
         <input class="field-input number-input" type="number" id="tt-comp-prev" placeholder="0" oninput="calcDeltas()">
       </div>
+      <div class="field-group">
+        <label class="field-label">Compartidos (actual)</label>
+        <input class="field-input number-input" type="number" id="tt-comp-act" placeholder="0" oninput="calcDeltas()">
+      </div>
     </div>
     <div class="card-row">
       <div class="field-group">
-        <label class="field-label">Seguidores nuevos (actual)</label>
-        <input class="field-input number-input" type="number" id="tt-seg-act" placeholder="0" oninput="calcDeltas()">
-      </div>
-      <div class="field-group">
         <label class="field-label">Seguidores nuevos (anterior)</label>
         <input class="field-input number-input" type="number" id="tt-seg-prev" placeholder="0" oninput="calcDeltas()">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Seguidores nuevos (actual)</label>
+        <input class="field-input number-input" type="number" id="tt-seg-act" placeholder="0" oninput="calcDeltas()">
       </div>
     </div>
 
@@ -1135,12 +1147,26 @@ function calcDeltas() {
     { label: 'TT Compartidos', actId: 'tt-comp-act', prevId: 'tt-comp-prev' },
     { label: 'TT Seguidores nuevos', actId: 'tt-seg-act', prevId: 'tt-seg-prev', platform: 'tt-seg' },
   ];
+  
   const tbody = document.getElementById('deltas-table');
   tbody.innerHTML = '';
+  
   metrics.forEach(m => {
-    const act = parseFloat(document.getElementById(m.actId)?.value) || 0;
-    const prev = parseFloat(document.getElementById(m.prevId)?.value) || 0;
+    const actEl = document.getElementById(m.actId);
+    const prevEl = document.getElementById(m.prevId);
+    const act = parseFloat(actEl?.value) || 0;
+    const prev = parseFloat(prevEl?.value) || 0;
     const d = delta(act, prev);
+    
+    // Cambiar color del borde dinámicamente
+    if (actEl && prevEl?.value !== '') {
+        if (act > prev) actEl.style.borderColor = 'var(--pos)';
+        else if (act < prev) actEl.style.borderColor = 'var(--neg)';
+        else actEl.style.borderColor = '';
+    } else if (actEl) {
+        actEl.style.borderColor = '';
+    }
+
     const dFmt = fmtDelta(d);
     const cls = d === null ? 'neutral' : parseFloat(d) >= 0 ? 'pos' : 'neg';
     const tr = document.createElement('tr');
@@ -1267,7 +1293,6 @@ function updateIgWeekChart() {
 
 function updateTTChart() {
   if (!ttBarChart) return;
-  // Mantiene las etiquetas base fijas en el gráfico independientemente del nombre ingresado
   ttBarChart.data.labels = ['Vid 1', 'Vid 2', 'Vid 3', 'Vid 4', 'Vid 5', 'Vid 6'];
   ttBarChart.data.datasets[0].data = [ parseFloat(document.getElementById('tt-v1').value)||0, parseFloat(document.getElementById('tt-v2').value)||0, parseFloat(document.getElementById('tt-v3').value)||0, parseFloat(document.getElementById('tt-v4').value)||0, parseFloat(document.getElementById('tt-v5').value)||0, parseFloat(document.getElementById('tt-v6').value)||0 ];
   ttBarChart.update('none');
@@ -1327,7 +1352,7 @@ document.getElementById('tt-views-act').addEventListener('input', calcTTAvg);
 // --- GUARDADO Y CARGA (JSON) ---
 function saveJSON() {
   const data = {};
-  // Guardamos todos los inputs y textareas indexados (incluso los que no tienen ID, como los tops de contenido)
+  // Guardamos todos los inputs y textareas indexados
   document.querySelectorAll('input:not([type="file"]), textarea').forEach((el, index) => {
     const key = el.id || `unnamed-${index}`;
     data[key] = el.value;
@@ -1380,7 +1405,9 @@ document.getElementById('json-upload')?.addEventListener('change', function(e) {
             } else if (['ig-sem1','ig-sem2','ig-sem3','ig-sem4','ig-pct-reels','ig-pct-feed','tt-v1','tt-v2','tt-v3','tt-v4','tt-v5','tt-v6','tt-name-v1','tt-name-v2','tt-name-v3','tt-name-v4','tt-name-v5','tt-name-v6','ig-com-input','ig-num-posts','ig-num-reels','ig-stories-avg','tt-num-videos'].includes(key)) {
               el.value = ''; // Vaciar métricas específicas de gráficos
             } else if (key.startsWith('unnamed-') && el.type === 'number') {
-              el.value = ''; // Vaciar los números sueltos (como reproducciones de top contenidos)
+              el.value = ''; // Vaciar los números sueltos
+            } else if (el.type === 'url') {
+              el.value = ''; // Vaciar URLs viejas
             } else {
               el.value = data[key]; // Cargar el resto (textos, planes, nombres)
             }
@@ -1428,29 +1455,28 @@ function exportToPDF() {
   window.print();
 }
 
-// MAGIA PARA PDF: Convertimos inputs en texto y links reales, y ocultamos las tarjetas/ítems que estén vacíos
 window.addEventListener('beforeprint', () => {
+  // Lógica inteligente para ocultar la información del cliente si ya hay un logo visual (Hoja 1)
+  const hasLogo = document.getElementById('cover-logo-display').classList.contains('has-image');
+  if (hasLogo) {
+    document.getElementById('cover-client-display')?.classList.add('hide-in-print-temp');
+    document.querySelector('.cover-client-sub')?.classList.add('hide-in-print-temp');
+  }
+
   document.querySelectorAll('input:not([type="file"]), textarea').forEach(el => {
-    // Si ya procesamos este elemento, saltar
     if (el.nextElementSibling && el.nextElementSibling.classList.contains('print-fallback')) return;
     
     const val = el.value.trim();
 
-    // LOGICA DE OCULTAR CAMPOS VACIOS
+    // === LÓGICA DE OCULTAMIENTO INTELIGENTE (Campos vacíos) ===
     if (!val) {
-      // 1. Ocultar URL input vacíos sin tocar nada más
-      if (el.type === 'url') {
+      if (el.type === 'url' || el.classList.contains('inline-name-input')) {
         el.classList.add('hide-in-print');
         return;
       }
-      // 2. Nombres en línea (ej. nombres de videos TT) -> se ignoran (solo se esconden)
-      if (el.classList.contains('inline-name-input')) return;
-
-      // 3. Ítems del Plan Próximo Mes vacíos
       const planItem = el.closest('.plan-item');
       if (planItem) { planItem.classList.add('hide-in-print-empty'); return; }
 
-      // 4. Tarjetas de Top Contenido vacías (Revisa si la descripción está vacía)
       const contentCard = el.closest('.content-card');
       if (contentCard) {
         const firstTextInput = contentCard.querySelector('input[type="text"]');
@@ -1458,42 +1484,37 @@ window.addEventListener('beforeprint', () => {
           contentCard.classList.add('hide-in-print-empty');
           return;
         }
-        if (contentCard.classList.contains('hide-in-print-empty')) return; // Ya está oculto
+        if (contentCard.classList.contains('hide-in-print-empty')) return;
       }
 
-      // 5. Textareas vacíos (conclusiones) o grupos generales de texto vacíos
       const fieldGroup = el.closest('.field-group');
-      if (fieldGroup && el.type !== 'number') {
+      if (fieldGroup && el.type !== 'number' && el.id !== 'client-name-input') {
         fieldGroup.classList.add('hide-in-print-empty');
       }
-      return; // No construimos un fallback si está vacío
+      return; 
     }
 
-    // SI HAY TEXTO, CREAMOS EL FALLBACK VISUAL
+    // === CREACIÓN DE FALLBACKS (Para textos largos y links en PDF) ===
     let fallback;
     
-    // Si es un link (URL), lo transformamos en un botón clickeable para el PDF
     if (el.type === 'url') {
       fallback = document.createElement('a');
       fallback.href = val;
-      fallback.textContent = '🔗 Ver publicación';
+      fallback.textContent = '🔗';
       fallback.target = '_blank';
-      fallback.style.cssText = `
-        display: inline-block;
-        margin-top: 4px; margin-bottom: 8px;
-        color: var(--yellow); text-decoration: none;
-        font-weight: 600; font-size: 13px; font-family: var(--font);
-        background: var(--gray-2); padding: 6px 12px;
-        border-radius: 6px; border: 1px solid var(--gray-3);
-      `;
+      fallback.className = 'print-fallback url-btn-fallback';
     } else {
-      // Es texto normal
       fallback = document.createElement(el.tagName === 'TEXTAREA' ? 'div' : 'span');
       fallback.textContent = val;
       fallback.className = el.className + ' print-fallback';
       fallback.style.cssText = el.style.cssText;
       
-      // Adaptar estilos específicos en línea
+      // Adaptar estilos para grillas o elementos inline
+      if (el.tagName === 'INPUT' && (el.type === 'text' || el.type === 'number') && !el.classList.contains('inline-name-input')) {
+         fallback.style.display = 'block';
+         fallback.style.width = '100%';
+         fallback.style.boxSizing = 'border-box';
+      }
       if (el.classList.contains('inline-name-input')) {
         fallback.style.display = 'inline-block';
         fallback.style.width = 'auto';
@@ -1501,18 +1522,17 @@ window.addEventListener('beforeprint', () => {
       }
     }
     
-    fallback.classList.add('print-fallback'); // Marca para limpiar luego
     el.parentNode.insertBefore(fallback, el.nextSibling);
     el.classList.add('hide-in-print');
   });
 });
 
-// Limpieza automática tras volver al editor
 window.addEventListener('afterprint', () => {
   document.querySelectorAll('.print-fallback').forEach(el => el.remove());
-  document.querySelectorAll('.hide-in-print, .hide-in-print-empty').forEach(el => {
+  document.querySelectorAll('.hide-in-print, .hide-in-print-empty, .hide-in-print-temp').forEach(el => {
     el.classList.remove('hide-in-print');
     el.classList.remove('hide-in-print-empty');
+    el.classList.remove('hide-in-print-temp');
   });
 });
 
