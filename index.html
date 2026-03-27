@@ -399,6 +399,28 @@
 
     <div class="section-title">Conclusión del mes</div>
     <textarea class="field-input" id="conclusion-mes" placeholder="Ej: TikTok está funcionando como canal de descubrimiento y alcance masivo, mientras que Instagram mantiene mejor conversión en interacción y comunidad." rows="4"></textarea>
+
+    <!-- MOVIDO DE TLDR: Formato más fuerte -->
+    <div class="section-title">Formato más fuerte</div>
+    <div class="card-row">
+      <div class="card" style="text-align:center;">
+        <div style="font-size:11px;color:var(--ig);font-family:var(--num-font);font-weight:700;margin-bottom:6px;letter-spacing:0.05em;">INSTAGRAM</div>
+        <div id="tldr-ig-formato" style="font-size:14px;color:var(--gray-5);font-weight:500;">—</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="font-size:11px;color:var(--tt-accent);font-family:var(--num-font);font-weight:700;margin-bottom:6px;letter-spacing:0.05em;">TIKTOK</div>
+        <div id="tldr-tt-formato" style="font-size:14px;color:var(--gray-5);font-weight:500;">—</div>
+      </div>
+    </div>
+
+    <!-- MOVIDO DE TLDR: Alcance Comparativo -->
+    <div class="section-title">Alcance comparativo</div>
+    <div style="display:flex;gap:12px;margin-bottom:8px;font-size:12px;color:#888;">
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#E1306C;display:inline-block;"></span>Mes actual</span>
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#F9CB42;display:inline-block;"></span>Mes anterior</span>
+    </div>
+    <div class="chart-wrap"><canvas id="tldrCompChart"></canvas></div>
+
   </div>
 
   <!-- PAGE 3 — MÉTRICAS GENERALES -->
@@ -909,88 +931,17 @@
     </div>
   </div>
 
-  <!-- PAGE 11 — TLDR -->
-  <div class="page" id="page-11">
-    <div class="page-label">TLDR</div>
-    <div class="page-title">Resumen Rápido</div>
-
-    <div class="platform-badge badge-ig">Instagram</div>
-    <div class="tldr-stat">
-      <div class="tldr-label">Alcance total</div>
-      <div class="tldr-value" id="tldr-ig-alcance">—</div>
-    </div>
-    <div class="tldr-stat">
-      <div class="tldr-label">Variación alcance</div>
-      <div class="tldr-value" id="tldr-ig-alcance-delta">—</div>
-    </div>
-    <div class="tldr-stat">
-      <div class="tldr-label">Seguidores nuevos</div>
-      <div class="tldr-value" id="tldr-ig-seg">—</div>
-    </div>
-    <div class="tldr-stat">
-      <div class="tldr-label">Variación seguidores</div>
-      <div class="tldr-value" id="tldr-ig-seg-delta">—</div>
-    </div>
-    <div class="tldr-stat">
-      <div class="tldr-label">Views de reels</div>
-      <div class="tldr-value" id="tldr-ig-views">—</div>
-    </div>
-
-    <div class="platform-badge badge-tt" style="margin-top:20px;">TikTok</div>
-    <div class="tldr-stat">
-      <div class="tldr-label">Views totales</div>
-      <div class="tldr-value" id="tldr-tt-views">—</div>
-    </div>
-    <div class="tldr-stat">
-      <div class="tldr-label">Variación views</div>
-      <div class="tldr-value" id="tldr-tt-views-delta">—</div>
-    </div>
-    <div class="tldr-stat">
-      <div class="tldr-label">Seguidores nuevos</div>
-      <div class="tldr-value" id="tldr-tt-seg">—</div>
-    </div>
-    <div class="tldr-stat">
-      <div class="tldr-label">Variación seguidores</div>
-      <div class="tldr-value" id="tldr-tt-seg-delta">—</div>
-    </div>
-
-    <div class="section-title">Conclusión del mes</div>
-    <div class="conclusion-box" id="tldr-conclusion-display">
-      <em style="color:var(--gray-3);">Completá la conclusión en la Hoja 2 para que aparezca acá.</em>
-    </div>
-
-    <div class="section-title">Formato más fuerte</div>
-    <div class="card-row">
-      <div class="card" style="text-align:center;">
-        <div style="font-size:11px;color:var(--ig);font-family:var(--mono);margin-bottom:6px;">INSTAGRAM</div>
-        <div id="tldr-ig-formato" style="font-size:14px;color:var(--gray-5);">—</div>
-      </div>
-      <div class="card" style="text-align:center;">
-        <div style="font-size:11px;color:var(--tt-accent);font-family:var(--mono);margin-bottom:6px;">TIKTOK</div>
-        <div id="tldr-tt-formato" style="font-size:14px;color:var(--gray-5);">—</div>
-      </div>
-    </div>
-
-    <!-- MINI CHART OVERVIEW -->
-    <div class="section-title">Alcance comparativo</div>
-    <div style="display:flex;gap:12px;margin-bottom:8px;font-size:12px;color:#888;">
-      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#E1306C;display:inline-block;"></span>Mes actual</span>
-      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#F9CB42;display:inline-block;"></span>Mes anterior</span>
-    </div>
-    <div class="chart-wrap"><canvas id="tldrCompChart"></canvas></div>
-  </div>
-
   <!-- BOTTOM NAV -->
   <div id="bottom-nav">
     <button class="nav-arrow" id="btn-prev" onclick="navigate(-1)">←</button>
-    <div id="page-indicator">1 / 11</div>
+    <div id="page-indicator">1 / 10</div>
     <button class="nav-arrow" id="btn-next" onclick="navigate(1)">→</button>
   </div>
 </div>
 
 <script>
-const PAGES = 11;
-const PAGE_LABELS = ['Portada','Resumen','Métricas','Alcance','IG Detalle','TT Detalle','Top Contenidos','Lo que no funcionó','Plan próximo mes','Conclusión','TLDR'];
+const PAGES = 10;
+const PAGE_LABELS = ['Portada','Resumen','Métricas','Alcance','IG Detalle','TT Detalle','Top Contenidos','Lo que no funcionó','Plan próximo mes','Conclusión'];
 let currentPage = 1;
 
 // Theme logic
@@ -1082,7 +1033,6 @@ function goTo(n) {
   document.getElementById('btn-prev').disabled = n === 1;
   document.getElementById('btn-next').disabled = n === PAGES;
   tabsEl.children[n - 1]?.scrollIntoView({ inline: 'center', behavior: 'smooth' });
-  updateTLDR();
 }
 
 function navigate(dir) { goTo(Math.min(PAGES, Math.max(1, currentPage + dir))); }
@@ -1296,40 +1246,11 @@ function updateTLDRChart() {
 }
 
 function updateTLDR() {
-  const get = id => parseFloat(document.getElementById(id)?.value) || 0;
   const getStr = id => document.getElementById(id)?.value || '';
-
-  document.getElementById('tldr-ig-alcance').textContent = fmtNum(get('ig-alcance-act'));
-  document.getElementById('tldr-ig-views').textContent = fmtNum(get('ig-views-act'));
-  document.getElementById('tldr-ig-seg').textContent = fmtNum(get('ig-seg-act'));
-  document.getElementById('tldr-tt-views').textContent = fmtNum(get('tt-views-act'));
-  document.getElementById('tldr-tt-seg').textContent = fmtNum(get('tt-seg-act'));
-
-  const d1 = delta(get('ig-alcance-act'), get('ig-alcance-prev'));
-  const d2 = delta(get('ig-seg-act'), get('ig-seg-prev'));
-  const d3 = delta(get('tt-views-act'), get('tt-views-prev'));
-  const d4 = delta(get('tt-seg-act'), get('tt-seg-prev'));
-
-  const setTldrDelta = (id, d) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.textContent = fmtDelta(d);
-    el.style.color = d === null ? '#888' : parseFloat(d) >= 0 ? 'var(--pos)' : 'var(--neg)';
-  };
-  setTldrDelta('tldr-ig-alcance-delta', d1);
-  setTldrDelta('tldr-ig-seg-delta', d2);
-  setTldrDelta('tldr-tt-views-delta', d3);
-  setTldrDelta('tldr-tt-seg-delta', d4);
-
-  const conclusion = getStr('conclusion-mes');
-  const conclusionEl = document.getElementById('tldr-conclusion-display');
-  conclusionEl.innerHTML = conclusion ? conclusion : '<em style="color:var(--gray-3)">Completá la conclusión en la Hoja 2.</em>';
-
   document.getElementById('tldr-ig-formato').textContent = getStr('ig-formato-fuerte') || '—';
   document.getElementById('tldr-tt-formato').textContent = getStr('tt-formato-fuerte') || '—';
 }
 
-document.getElementById('conclusion-mes').addEventListener('input', updateTLDR);
 document.getElementById('ig-formato-fuerte').addEventListener('input', updateTLDR);
 document.getElementById('tt-formato-fuerte').addEventListener('input', updateTLDR);
 document.getElementById('ig-guardados-act').addEventListener('input', updateIgDetails);
@@ -1438,8 +1359,12 @@ document.getElementById('json-upload')?.addEventListener('change', function(e) {
 function exportToPDF() {
   const originalActive = document.querySelector('.page.active');
   
-  // 1. Forzar visualización de todas las hojas para medir la altura real
-  document.querySelectorAll('.page').forEach(p => p.style.display = 'block');
+  // 1. Forzar visualización de todas las hojas para medir la altura real y remover margins temporales
+  document.querySelectorAll('.page').forEach(p => {
+    p.style.display = 'block';
+    p.style.paddingBottom = '32px'; // Remueve el gap enorme de 80px usado para el menú de navegación al exportar
+  });
+  document.getElementById('app').style.minHeight = '0';
   
   // Ocultar sección de portada si hay logo
   const hasLogo = document.getElementById('cover-logo-display').classList.contains('has-image');
@@ -1508,36 +1433,38 @@ function exportToPDF() {
     el.classList.add('hide-in-print');
   });
 
-  // 2. Darle al navegador 50ms para renderizar todos los fallbacks y medir la altura
+  // 2. Darle al navegador 50ms para renderizar todos los fallbacks y medir la altura milimétrica
   setTimeout(() => {
     const appContainer = document.getElementById('app');
     const totalHeight = Math.ceil(appContainer.getBoundingClientRect().height);
     
-    // Inyectar el tamaño dinámico milimétrico al gestor de impresión
+    // Inyectar el tamaño dinámico milimétrico al gestor de impresión (Elimina el espacio en blanco gigante al final)
     let style = document.getElementById('dynamic-print-size');
     if (!style) {
       style = document.createElement('style');
       style.id = 'dynamic-print-size';
       document.head.appendChild(style);
     }
-    // Forzamos un solo lienzo continuo de 480px de ancho y X largo sumado
-    style.innerHTML = `@media print { @page { size: 480px ${totalHeight + 10}px !important; margin: 0 !important; } }`;
+    // Forzamos un solo lienzo continuo de 480px de ancho y justo el largo sumado, sin agregar px de más
+    style.innerHTML = `@media print { @page { size: 480px ${totalHeight}px !important; margin: 0 !important; } }`;
     
-    // Restaurar UI a la normalidad para que no parpadee al ojo del usuario
-    document.querySelectorAll('.page').forEach(p => p.style.display = '');
-    if (originalActive) originalActive.style.display = 'block';
-
     // 3. Imprimir
     setTimeout(() => {
       window.print();
       
-      // Limpieza post-impresión
+      // Restauración limpia y sin parpadeos después de mandar a imprimir
       document.querySelectorAll('.print-fallback').forEach(el => el.remove());
       document.querySelectorAll('.hide-in-print, .hide-in-print-empty, .hide-in-print-temp').forEach(el => {
         el.classList.remove('hide-in-print');
         el.classList.remove('hide-in-print-empty');
         el.classList.remove('hide-in-print-temp');
       });
+      document.querySelectorAll('.page').forEach(p => {
+        p.style.display = '';
+        p.style.paddingBottom = '';
+      });
+      document.getElementById('app').style.minHeight = '';
+      if (originalActive) originalActive.style.display = 'block';
       if(document.getElementById('dynamic-print-size')) document.getElementById('dynamic-print-size').remove();
     }, 150);
   }, 50);
