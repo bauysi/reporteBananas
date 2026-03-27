@@ -14,10 +14,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 
-<!-- Librerías para generación directa de PDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <style>
   :root {
     --black: #0A0A0A;
@@ -244,6 +240,59 @@
   .conclusion-box { background: rgba(249,203,66,0.08); border: 1px solid rgba(249,203,66,0.2); border-radius: 10px; padding: 14px; font-size: 14px; line-height: 1.6; color: var(--gray-5); margin: 12px 0; }
   .conclusion-box strong { color: var(--yellow); font-weight: 500; }
 
+  /* ========================================================= */
+  /* 🖨️ PDF VECTORIAL NATIVO (100% SELECCIONABLE, INFOGRAFÍA CONTINUA) */
+  /* ========================================================= */
+  @media print {
+    /* El tamaño exacto se inyectará dinámicamente con JS */
+    html, body { 
+      background-color: var(--black) !important; color: var(--white) !important; 
+      margin: 0 !important; padding: 0 !important; height: auto !important; min-height: 100% !important; overflow: visible !important;
+      -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; 
+    }
+    
+    #topbar, #pagetabs, #bottom-nav, #logo-upload-group, #logo-text-group { display: none !important; }
+    
+    #app { max-width: 480px !important; width: 480px !important; margin: 0 auto !important; padding: 0 !important; }
+    
+    /* Todas las hojas se apilan sin espacios creando un reporte fluido */
+    .page { 
+      display: block !important; page-break-after: avoid !important; page-break-inside: avoid !important;
+      padding: 32px 24px !important; height: auto !important; overflow: visible !important; min-height: 0 !important;
+      margin: 0 !important; opacity: 1 !important; transform: none !important; animation: none !important;
+    }
+
+    .hide-in-print, .hide-in-print-empty, .hide-in-print-temp { display: none !important; }
+    #client-name-group { display: none !important; }
+    
+    /* Estilos para textos clonados y links intercativos */
+    .print-fallback {
+      margin: 0 !important; white-space: pre-wrap !important; box-sizing: border-box !important;
+      word-wrap: break-word !important; overflow-wrap: break-word !important; outline: none !important; box-shadow: none !important;
+    }
+    div.print-fallback { display: block !important; width: 100% !important; height: auto !important; }
+
+    .url-btn-fallback {
+      display: inline-flex !important; align-items: center !important; justify-content: center !important;
+      background: var(--yellow) !important; color: #0A0A0A !important;
+      border-radius: 50% !important; width: 28px !important; height: 28px !important;
+      text-decoration: none !important; font-size: 14px !important; margin-bottom: 8px !important;
+    }
+
+    ::-webkit-input-placeholder { color: transparent !important; }
+    :-moz-placeholder { color: transparent !important; }
+    ::-moz-placeholder { color: transparent !important; }
+    :-ms-input-placeholder { color: transparent !important; }
+
+    .card, .metric, .content-card, .tldr-stat, .conclusion-box { border: 1px solid var(--gray-2) !important; }
+    .metric { background-color: var(--gray-2) !important; }
+    .content-card { background-color: var(--gray-2) !important; border-left: 3px solid var(--yellow) !important; }
+    
+    .card, .content-card, .chart-wrap, .metric, .plan-block {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+  }
 </style>
 </head>
 <body>
@@ -262,7 +311,7 @@
       <button class="top-action-btn" onclick="triggerLoadJSON()" title="Cargar datos (JSON)">📂</button>
       <input type="file" id="json-upload" accept=".json" style="display:none">
       <button class="top-action-btn" id="theme-btn" onclick="toggleTheme()" title="Cambiar tema">☀️</button>
-      <button class="top-action-btn" onclick="exportToPDF()" title="Exportar reporte vectorizado (Fluido/Continuo)">📄 PDF</button>
+      <button class="top-action-btn" onclick="exportToPDF()" title="Exportar reporte interactivo (PDF)">📄 PDF</button>
     </div>
   </div>
 
@@ -1385,168 +1434,113 @@ document.getElementById('json-upload')?.addEventListener('change', function(e) {
   reader.readAsText(file);
 });
 
-// --- LÓGICA PARA EXPORTACIÓN DIRECTA A PDF (Hoja Dinámica 1 a 11) ---
-async function exportToPDF() {
-  const btn = document.querySelector('button[onclick="exportToPDF()"]');
-  const originalText = btn.textContent;
-  btn.textContent = "⏳ Generando PDF...";
-  btn.disabled = true;
+// --- LÓGICA PARA EXPORTACIÓN INFOGRAFÍA PERFECTA Y SELECCIONABLE ---
+function exportToPDF() {
+  const originalActive = document.querySelector('.page.active');
+  
+  // 1. Forzar visualización de todas las hojas para medir la altura real
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'block');
+  
+  // Ocultar sección de portada si hay logo
+  const hasLogo = document.getElementById('cover-logo-display').classList.contains('has-image');
+  if (hasLogo) {
+    document.getElementById('cover-client-section').classList.add('hide-in-print-temp');
+  }
 
-  try {
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ unit: 'px', orientation: 'portrait', format: [480, 800] });
-    pdf.deletePage(1); // Borramos hoja inicial temporal
+  // Preparamos fallbacks de los textos (Para que el PDF sea 100% copiable y fluido)
+  document.querySelectorAll('input:not([type="file"]), textarea').forEach(el => {
+    if (el.nextElementSibling && el.nextElementSibling.classList.contains('print-fallback')) return;
+    
+    const val = el.value.trim();
 
-    // 1. Preparación de la interfaz para exportación
-    document.getElementById('topbar').style.display = 'none';
-    document.getElementById('pagetabs').style.display = 'none';
-    document.getElementById('bottom-nav').style.display = 'none';
-    document.getElementById('logo-upload-group').style.display = 'none';
-    document.getElementById('client-name-group').style.display = 'none';
-
-    // Ocultar textos de la portada si hay logo subido
-    const hasLogo = document.getElementById('cover-logo-display').classList.contains('has-image');
-    if (hasLogo) {
-      document.getElementById('cover-client-section').style.display = 'none';
-    }
-
-    // Reemplazo de inputs y textareas, ocultamiento dinámico si están vacíos
-    const fallbacks = [];
-    document.querySelectorAll('input:not([type="file"]), textarea').forEach(el => {
-      const val = el.value.trim();
-      
-      if (!val) {
-        if (el.type === 'url' || el.classList.contains('inline-name-input')) {
-          el.style.display = 'none'; fallbacks.push({ el, type: 'hide' }); return;
-        }
-        const planItem = el.closest('.plan-item');
-        if (planItem) { planItem.style.display = 'none'; fallbacks.push({ el: planItem, type: 'hide' }); return; }
-
-        const contentCard = el.closest('.content-card');
-        if (contentCard) {
-          const firstTextInput = contentCard.querySelector('input[type="text"]');
-          if (el === firstTextInput) {
-            contentCard.style.display = 'none'; fallbacks.push({ el: contentCard, type: 'hide' }); return;
-          }
-          if (contentCard.style.display === 'none') return;
-        }
-
-        const fieldGroup = el.closest('.field-group');
-        if (fieldGroup && el.type !== 'number' && el.id !== 'client-name-input') {
-          fieldGroup.style.display = 'none'; fallbacks.push({ el: fieldGroup, type: 'hide' });
-        }
+    // Logica de Ocultamiento de vacíos
+    if (!val) {
+      if (el.type === 'url' || el.classList.contains('inline-name-input')) {
+        el.classList.add('hide-in-print');
         return;
       }
+      const planItem = el.closest('.plan-item');
+      if (planItem) { planItem.classList.add('hide-in-print-empty'); return; }
 
-      let fallback;
-      if (el.type === 'url') {
-        fallback = document.createElement('a');
-        fallback.href = val;
-        fallback.target = '_blank';
-        fallback.setAttribute('data-pdf-link', 'true');
-        fallback.innerHTML = `<span style="display:inline-flex; align-items:center; justify-content:center; background:var(--yellow); color:#0A0A0A; border-radius:50%; width:28px; height:28px; font-size:14px; margin-bottom:8px;">🔗</span>`;
-        fallback.style.textDecoration = 'none';
-        fallback.style.display = 'block';
-      } else {
-        fallback = document.createElement('div');
-        fallback.textContent = val;
-        fallback.className = el.className;
-        fallback.style.border = 'none';
-        fallback.style.background = 'transparent';
-        fallback.style.color = 'var(--white)';
-        fallback.style.padding = '0';
-        fallback.style.margin = '0';
-        fallback.style.whiteSpace = 'pre-wrap';
-        fallback.style.wordWrap = 'break-word';
-        if (el.classList.contains('inline-name-input')) {
-          fallback.style.display = 'inline-block';
-          fallback.style.width = 'auto';
-        } else if (el.tagName === 'TEXTAREA') {
-           fallback.style.minHeight = '0';
-           fallback.style.height = 'auto';
+      const contentCard = el.closest('.content-card');
+      if (contentCard) {
+        const firstTextInput = contentCard.querySelector('input[type="text"]');
+        if (el === firstTextInput) {
+          contentCard.classList.add('hide-in-print-empty'); return;
         }
+        if (contentCard.classList.contains('hide-in-print-empty')) return;
       }
-      
-      el.parentNode.insertBefore(fallback, el.nextSibling);
-      el.style.display = 'none';
-      fallbacks.push({ el, fallback, type: 'replace' });
-    });
 
-    const bgColor = document.documentElement.getAttribute('data-theme') === 'light' ? '#FEFAE5' : '#0A0A0A';
-    const pages = document.querySelectorAll('.page');
-    const originalActive = document.querySelector('.page.active');
-
-    // 2. Renderización de hojas (Cálculo dinámico de alto por página y mapeo de links interactivos)
-    for (let i = 0; i < pages.length; i++) {
-      const page = pages[i];
-      
-      pages.forEach(p => p.style.display = 'none');
-      page.style.display = 'block';
-      page.style.padding = '40px 24px';
-      page.style.height = 'auto'; 
-      
-      await new Promise(r => setTimeout(r, 50)); // Permitimos que los gráficos se repinten
-
-      const canvas = await html2canvas(page, {
-        scale: 2.25, // Excelente resolución para dispositivos
-        useCORS: true,
-        backgroundColor: bgColor,
-        width: 480,
-        windowWidth: 480
-      });
-      
-      const imgData = canvas.toDataURL('image/jpeg', 0.98);
-      const pdfWidth = 480;
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      
-      pdf.addPage([pdfWidth, pdfHeight], 'portrait');
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-
-      // Mapear interacciones matemáticas (para que los 🔗 funcionen nativamente dentro del PDF)
-      const links = page.querySelectorAll('a[data-pdf-link]');
-      links.forEach(linkEl => {
-        const rect = linkEl.querySelector('span').getBoundingClientRect();
-        const pageRect = page.getBoundingClientRect();
-        const x = rect.left - pageRect.left;
-        const y = rect.top - pageRect.top;
-        
-        pdf.linkWithURL(x, y, rect.width, rect.height, linkEl.href);
-      });
-      
-      page.style.padding = ''; 
+      const fieldGroup = el.closest('.field-group');
+      if (fieldGroup && el.type !== 'number' && el.id !== 'client-name-input') {
+        fieldGroup.classList.add('hide-in-print-empty');
+      }
+      return; 
     }
 
-    // 3. Descarga Directa
-    const clientName = document.getElementById('client-name-input').value || 'Cliente';
-    const month = document.getElementById('month-input').value || 'Mes';
-    pdf.save(`Reporte_${clientName}_${month}.pdf`);
-
-    // 4. Restauración del Canvas a su estado original interactivo
-    fallbacks.forEach(f => {
-      if (f.type === 'hide') f.el.style.display = '';
-      else if (f.type === 'replace') {
-        f.el.style.display = '';
-        if (f.fallback) f.fallback.remove();
+    // Creación de fallback (Botones de link y Textos limpios)
+    let fallback;
+    if (el.type === 'url') {
+      fallback = document.createElement('a');
+      fallback.href = val;
+      fallback.textContent = '🔗';
+      fallback.target = '_blank';
+      fallback.className = 'print-fallback url-btn-fallback';
+    } else {
+      fallback = document.createElement(el.tagName === 'TEXTAREA' ? 'div' : 'span');
+      fallback.textContent = val;
+      fallback.className = el.className + ' print-fallback';
+      fallback.style.cssText = el.style.cssText;
+      
+      if (el.tagName === 'INPUT' && (el.type === 'text' || el.type === 'number') && !el.classList.contains('inline-name-input')) {
+         fallback.style.display = 'block';
+         fallback.style.width = '100%';
+         fallback.style.boxSizing = 'border-box';
       }
-    });
+      if (el.classList.contains('inline-name-input')) {
+        fallback.style.display = 'inline-block';
+        fallback.style.width = 'auto';
+        fallback.style.minWidth = '80px';
+      }
+    }
+    
+    el.parentNode.insertBefore(fallback, el.nextSibling);
+    el.classList.add('hide-in-print');
+  });
 
-    document.getElementById('topbar').style.display = '';
-    document.getElementById('pagetabs').style.display = '';
-    document.getElementById('bottom-nav').style.display = '';
-    document.getElementById('logo-upload-group').style.display = '';
-    document.getElementById('client-name-group').style.display = '';
-    document.getElementById('cover-client-section').style.display = ''; // Reaparecemos siempre la sección
+  // 2. Darle al navegador 50ms para renderizar todos los fallbacks y medir la altura
+  setTimeout(() => {
+    const appContainer = document.getElementById('app');
+    const totalHeight = Math.ceil(appContainer.getBoundingClientRect().height);
+    
+    // Inyectar el tamaño dinámico milimétrico al gestor de impresión
+    let style = document.getElementById('dynamic-print-size');
+    if (!style) {
+      style = document.createElement('style');
+      style.id = 'dynamic-print-size';
+      document.head.appendChild(style);
+    }
+    // Forzamos un solo lienzo continuo de 480px de ancho y X largo sumado
+    style.innerHTML = `@media print { @page { size: 480px ${totalHeight + 10}px !important; margin: 0 !important; } }`;
+    
+    // Restaurar UI a la normalidad para que no parpadee al ojo del usuario
+    document.querySelectorAll('.page').forEach(p => p.style.display = '');
+    if (originalActive) originalActive.style.display = 'block';
 
-    pages.forEach(p => p.style.display = '');
-    originalActive.style.display = 'block';
-
-  } catch (err) {
-    console.error(err);
-    alert("Ocurrió un error al generar el PDF.");
-  } finally {
-    btn.textContent = originalText;
-    btn.disabled = false;
-  }
+    // 3. Imprimir
+    setTimeout(() => {
+      window.print();
+      
+      // Limpieza post-impresión
+      document.querySelectorAll('.print-fallback').forEach(el => el.remove());
+      document.querySelectorAll('.hide-in-print, .hide-in-print-empty, .hide-in-print-temp').forEach(el => {
+        el.classList.remove('hide-in-print');
+        el.classList.remove('hide-in-print-empty');
+        el.classList.remove('hide-in-print-temp');
+      });
+      if(document.getElementById('dynamic-print-size')) document.getElementById('dynamic-print-size').remove();
+    }, 150);
+  }, 50);
 }
 
 window.addEventListener('load', () => {
