@@ -204,10 +204,6 @@
   .plan-item:last-child { border: none; }
   .plan-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; margin-top: 7px; flex-shrink: 0; }
 
-  .tldr-stat { background: var(--gray-1); border: 1px solid var(--gray-2); border-radius: 10px; padding: 14px 16px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
-  .tldr-label { font-size: 13px; color: var(--gray-5); font-family: var(--font); font-weight: 500; }
-  .tldr-value { font-family: var(--num-font); font-size: 20px; font-weight: 700; }
-
   .cover-logo { 
     display: none; width: fit-content; max-width: 100%; border-radius: 16px; 
     margin-bottom: 24px; overflow: hidden; transition: all 0.2s;
@@ -243,44 +239,47 @@
   .conclusion-box strong { color: var(--yellow); font-weight: 500; }
 
   /* ========================================================= */
-  /* 🖨️ PDF: HOJA INDIVIDUAL CON ALTURA DINÁMICA PERFECTA */
+  /* 🖨️ PDF VECTORIAL NATIVO (TEXTO 100% SELECCIONABLE Y SIN CORTES) */
   /* ========================================================= */
   @media print {
-    /* El tamaño se inyecta dinámicamente con JavaScript justo antes de imprimir */
-    
+    /* Quitamos cualquier regla de tamaño fija global, el tamaño se inyectará dinámicamente con JS */
     html, body { 
       background-color: var(--black) !important; color: var(--white) !important; 
       margin: 0 !important; padding: 0 !important; height: 100% !important; overflow: hidden !important;
       -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; 
     }
     
+    /* Ocultamos elementos interactivos */
     #topbar, #pagetabs, #bottom-nav, #logo-upload-group, #logo-text-group { display: none !important; }
     
     #app { max-width: 480px !important; width: 480px !important; margin: 0 auto !important; padding: 0 !important; }
     
-    /* Solo se imprime la hoja activa, las demás se esconden completamente */
+    /* Regla súper estricta: Mostrar SOLO la hoja seleccionada, aislarla del resto del documento */
     .page:not(.active) { display: none !important; }
     
+    /* Configuramos la hoja activa como un bloque de impresión perfecto, sin márgenes colapsables */
     .page.active { 
-      display: block !important; page-break-after: avoid !important; page-break-inside: avoid !important;
+      display: flow-root !important; page-break-after: avoid !important; page-break-inside: avoid !important;
       padding: 32px 24px !important; height: auto !important; overflow: visible !important; min-height: 0 !important;
       margin: 0 !important; opacity: 1 !important; transform: none !important; animation: none !important;
     }
 
+    /* Ocultamiento de espacios vacíos */
     .hide-in-print, .hide-in-print-empty, .hide-in-print-temp { display: none !important; }
     #client-name-group { display: none !important; }
     
-    /* Estilos para textos clonados */
+    /* Estilos para textos procesados que reemplazan los inputs */
     .print-fallback {
-      margin: 0 !important; white-space: pre-wrap !important; box-sizing: border-box !important;
-      word-wrap: break-word !important; overflow-wrap: break-word !important; outline: none !important; box-shadow: none !important;
-      color: var(--white) !important; /* Fuerza color en tema oscuro */
+      margin: 0 !important; box-sizing: border-box !important;
+      white-space: pre-wrap !important; word-break: break-word !important; overflow-wrap: break-word !important; 
+      outline: none !important; box-shadow: none !important;
+      color: var(--white) !important;
+      min-height: 0 !important; height: auto !important;
     }
     [data-theme="light"] .print-fallback { color: var(--black) !important; }
-    
-    div.print-fallback { display: block !important; width: 100% !important; height: auto !important; }
+    div.print-fallback { display: block !important; width: 100% !important; }
 
-    /* El botón clickeable para los enlaces de videos */
+    /* Estilo del botón amarillo de enlace 🔗 en PDF */
     .url-btn-fallback {
       display: inline-flex !important; align-items: center !important; justify-content: center !important;
       background: var(--yellow) !important; color: #0A0A0A !important;
@@ -293,7 +292,8 @@
     ::-moz-placeholder { color: transparent !important; }
     :-ms-input-placeholder { color: transparent !important; }
 
-    .card, .metric, .content-card, .tldr-stat, .conclusion-box { border: 1px solid var(--gray-2) !important; }
+    /* Mantenemos bordes en impresión */
+    .card, .metric, .content-card, .conclusion-box { border: 1px solid var(--gray-2) !important; }
     .metric { background-color: var(--gray-2) !important; }
     .content-card { background-color: var(--gray-2) !important; border-left: 3px solid var(--yellow) !important; }
   }
@@ -315,8 +315,9 @@
       <button class="top-action-btn" onclick="triggerLoadJSON()" title="Cargar datos (JSON)">📂</button>
       <input type="file" id="json-upload" accept=".json" style="display:none">
       <button class="top-action-btn" id="theme-btn" onclick="toggleTheme()" title="Cambiar tema">☀️</button>
-      <!-- Botón actualizado para imprimir individualmente cada hoja -->
-      <button class="top-action-btn export-btn" onclick="exportCurrentPageToPDF()" title="Exportar la hoja que estás viendo a PDF">📄 Guardar Hoja Actual</button>
+      
+      <!-- BOTÓN MAESTRO: AUTO-EXPORTAR -->
+      <button class="top-action-btn export-btn" onclick="exportAllPagesNative()" title="Exportar las 10 hojas automáticamente, una por una">📄 Guardar 10 Hojas</button>
     </div>
   </div>
 
@@ -395,9 +396,9 @@
     </div>
 
     <div class="section-title">Conclusión del mes</div>
-    <textarea class="field-input" id="conclusion-mes" placeholder="Ej: TikTok está funcionando como canal de descubrimiento y alcance masivo, mientras que Instagram mantiene mejor conversión en interacción y comunidad." rows="4"></textarea>
+    <textarea class="field-input" id="conclusion-mes" placeholder="Ej: TikTok está funcionando como canal de descubrimiento y alcance masivo..." rows="4"></textarea>
 
-    <!-- MOVIDO A HOJA 2: Formato más fuerte -->
+    <!-- Formato más fuerte -->
     <div class="section-title">Formato más fuerte</div>
     <div class="card-row">
       <div class="card" style="text-align:center;">
@@ -410,7 +411,7 @@
       </div>
     </div>
 
-    <!-- MOVIDO A HOJA 2: Alcance Comparativo -->
+    <!-- Alcance Comparativo -->
     <div class="section-title">Alcance comparativo</div>
     <div style="display:flex;gap:12px;margin-bottom:8px;font-size:12px;color:#888;">
       <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#E1306C;display:inline-block;"></span>Mes actual</span>
@@ -487,7 +488,7 @@
       </div>
     </div>
 
-    <div class="platform-badge badge-tt">TikTok</div>
+    <div class="platform-badge badge-tt" style="margin-top: 10px;">TikTok</div>
     <div class="card-row">
       <div class="field-group">
         <label class="field-label">Views totales (anterior)</label>
@@ -1095,7 +1096,7 @@ function calcDeltas() {
     const prev = parseFloat(prevEl?.value) || 0;
     const d = delta(act, prev);
     
-    // Lógica dinámica de bordes
+    // Lógica dinámica de bordes (Verde si > anterior, Rojo si < anterior)
     if (actEl && prevEl?.value !== '') {
         if (act > prev) actEl.style.borderColor = 'var(--pos)';
         else if (act < prev) actEl.style.borderColor = 'var(--neg)';
@@ -1107,7 +1108,7 @@ function calcDeltas() {
     const dFmt = fmtDelta(d);
     const cls = d === null ? 'neutral' : parseFloat(d) >= 0 ? 'pos' : 'neg';
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td class="metric-name">${m.label}</td><td class="val">${fmtNum(act)}</td><td class="val" style="color:var(--gray-4)">${fmtNum(prev)}</td><td class="delta-cell ${cls}">${dFmt}</td>`;
+    tr.innerHTML = `<td class="metric-name">${m.label}</td><td class="val" style="color:var(--gray-4)">${fmtNum(prev)}</td><td class="val">${fmtNum(act)}</td><td class="delta-cell ${cls}">${dFmt}</td>`;
     tbody.appendChild(tr);
   });
 
@@ -1343,51 +1344,45 @@ document.getElementById('json-upload')?.addEventListener('change', function(e) {
   reader.readAsText(file);
 });
 
-// --- EXPORTACIÓN DE HOJA INDIVIDUAL EN PDF ---
-function exportCurrentPageToPDF() {
-  const activePage = document.querySelector('.page.active');
-  const pageNum = activePage.id.split('-')[1];
+// --- EL PODEROSO AUTO-LOOP DE IMPRESIÓN PDF NATIVA ---
+async function exportAllPagesNative() {
+  const btn = document.querySelector('.export-btn');
+  const origText = btn.textContent;
+  btn.textContent = "⏳ Procesando Hojas...";
+  btn.disabled = true;
 
-  // Forzar repintado para gráficos si están en la hoja activa
-  window.dispatchEvent(new Event('resize'));
-  
-  // Ocultar sección de portada si hay logo (Solo impacta a la Hoja 1)
+  const originalActive = document.querySelector('.page.active');
+  const clientName = document.getElementById('client-name-input').value.trim() || 'Cliente';
+  const originalTitle = document.title;
   const hasLogo = document.getElementById('cover-logo-display').classList.contains('has-image');
-  if (pageNum === '1' && hasLogo) {
-    document.getElementById('cover-client-section').classList.add('hide-in-print-temp');
-  }
 
-  // Preparamos fallbacks de los textos
-  activePage.querySelectorAll('input:not([type="file"]), textarea').forEach(el => {
-    if (el.nextElementSibling && el.nextElementSibling.classList.contains('print-fallback')) return;
-    
+  // Preparación Global de la interfaz
+  const fallbacks = [];
+  document.querySelectorAll('input:not([type="file"]), textarea').forEach(el => {
     const val = el.value.trim();
-
-    // Lógica de Ocultamiento de vacíos
     if (!val) {
       if (el.type === 'url' || el.classList.contains('inline-name-input')) {
-        el.classList.add('hide-in-print'); return;
+        el.classList.add('hide-in-print'); fallbacks.push({ el, type: 'hide' }); return;
       }
       const planItem = el.closest('.plan-item');
-      if (planItem) { planItem.classList.add('hide-in-print-empty'); return; }
+      if (planItem) { planItem.classList.add('hide-in-print-empty'); fallbacks.push({ el: planItem, type: 'hide' }); return; }
 
       const contentCard = el.closest('.content-card');
       if (contentCard) {
         const firstTextInput = contentCard.querySelector('input[type="text"]');
         if (el === firstTextInput) {
-          contentCard.classList.add('hide-in-print-empty'); return;
+          contentCard.classList.add('hide-in-print-empty'); fallbacks.push({ el: contentCard, type: 'hide' }); return;
         }
         if (contentCard.classList.contains('hide-in-print-empty')) return;
       }
 
       const fieldGroup = el.closest('.field-group');
       if (fieldGroup && el.type !== 'number' && el.id !== 'client-name-input') {
-        fieldGroup.classList.add('hide-in-print-empty');
+        fieldGroup.classList.add('hide-in-print-empty'); fallbacks.push({ el: fieldGroup, type: 'hide' });
       }
       return; 
     }
 
-    // Creación de fallback (Botones de link y Textos limpios)
     let fallback;
     if (el.type === 'url') {
       fallback = document.createElement('a');
@@ -1402,56 +1397,69 @@ function exportCurrentPageToPDF() {
       fallback.style.cssText = el.style.cssText;
       
       if (el.tagName === 'INPUT' && (el.type === 'text' || el.type === 'number') && !el.classList.contains('inline-name-input')) {
-         fallback.style.display = 'block';
-         fallback.style.width = '100%';
-         fallback.style.boxSizing = 'border-box';
+         fallback.style.display = 'block'; fallback.style.width = '100%'; fallback.style.boxSizing = 'border-box';
       }
       if (el.classList.contains('inline-name-input')) {
-        fallback.style.display = 'inline-block';
-        fallback.style.width = 'auto';
-        fallback.style.minWidth = '80px';
+        fallback.style.display = 'inline-block'; fallback.style.width = 'auto'; fallback.style.minWidth = '80px';
       }
     }
     
     el.parentNode.insertBefore(fallback, el.nextSibling);
     el.classList.add('hide-in-print');
+    fallbacks.push({ el, fallback, type: 'replace' });
   });
 
-  // Darle al navegador 50ms para renderizar los textos y medir la altura milimétrica de LA HOJA ACTUAL
-  setTimeout(() => {
-    // Calculamos el alto solo de la hoja visible
-    const height = Math.ceil(activePage.getBoundingClientRect().height);
-    
-    let style = document.getElementById('dynamic-print-size');
-    if (!style) {
-      style = document.createElement('style');
-      style.id = 'dynamic-print-size';
-      document.head.appendChild(style);
-    }
-    
-    // Inyectamos la medida exacta de esta hoja
-    style.innerHTML = `@media print { @page { size: 480px ${height}px !important; margin: 0 !important; } }`;
+  // LOOP: Imprime una por una midiendo su altura exacta
+  for (let i = 1; i <= PAGES; i++) {
+    await new Promise(resolve => {
+      // Ocultar todas las páginas, mostrar solo la que toca
+      document.querySelectorAll('.page').forEach(p => { p.style.display = 'none'; p.classList.remove('active'); });
+      const page = document.getElementById('page-' + i);
+      page.style.display = 'block';
+      page.classList.add('active');
 
-    // Cambiar nombre del archivo sugerido dinámicamente
-    const oldTitle = document.title;
-    const clientName = document.getElementById('client-name-input').value || 'Cliente';
-    document.title = `Reporte_${clientName}_Hoja_${pageNum}`;
-    
-    // Imprimir
-    setTimeout(() => {
-      window.print();
-      
-      // Restauración de título y clases
-      document.title = oldTitle;
-      activePage.querySelectorAll('.print-fallback').forEach(el => el.remove());
-      activePage.querySelectorAll('.hide-in-print, .hide-in-print-empty, .hide-in-print-temp').forEach(el => {
-        el.classList.remove('hide-in-print');
-        el.classList.remove('hide-in-print-empty');
-        el.classList.remove('hide-in-print-temp');
-      });
-      if(document.getElementById('dynamic-print-size')) document.getElementById('dynamic-print-size').remove();
-    }, 100);
-  }, 50);
+      // Portada inteligente
+      const clientSection = document.getElementById('cover-client-section');
+      if (i === 1 && hasLogo && clientSection) clientSection.classList.add('hide-in-print-temp');
+      else if (clientSection) clientSection.classList.remove('hide-in-print-temp');
+
+      // Forzar calculo de medidas milimétricas exactas
+      void page.offsetHeight;
+      const exactHeight = Math.ceil(page.getBoundingClientRect().height);
+
+      let style = document.getElementById('dynamic-print-size');
+      if (!style) { style = document.createElement('style'); style.id = 'dynamic-print-size'; document.head.appendChild(style); }
+      style.innerHTML = `@media print { @page { size: 480px ${exactHeight + 1}px !important; margin: 0 !important; } }`;
+
+      document.title = `Reporte_${clientName}_Hoja_${i}`;
+
+      setTimeout(() => {
+        window.print();
+        resolve();
+      }, 200); // 200ms por página asegura que el navegador aplique los estilos de tamaño
+    });
+  }
+
+  // Restauración
+  document.title = originalTitle;
+  if(document.getElementById('dynamic-print-size')) document.getElementById('dynamic-print-size').remove();
+  
+  fallbacks.forEach(f => {
+    if (f.type === 'hide') {
+        f.el.classList.remove('hide-in-print', 'hide-in-print-empty');
+    } else if (f.type === 'replace') {
+        f.el.classList.remove('hide-in-print');
+        if (f.fallback) f.fallback.remove();
+    }
+  });
+
+  document.querySelectorAll('.page').forEach(p => p.style.display = '');
+  document.getElementById('cover-client-section')?.classList.remove('hide-in-print-temp');
+  
+  goTo(1); // Devolvemos al usuario a la hoja 1
+
+  btn.textContent = origText;
+  btn.disabled = false;
 }
 
 window.addEventListener('load', () => {
