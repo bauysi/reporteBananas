@@ -54,6 +54,9 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; background: var(--black); color: var(--white); font-family: var(--font); transition: background 0.2s, color 0.2s; }
 
+  /* AUMENTO DE FUENTE BASE A 18PX */
+  html, body { font-size: 18px !important; }
+
   /* SHELL */
   #app { display: flex; flex-direction: column; min-height: 100dvh; max-width: 480px; margin: 0 auto; }
 
@@ -146,7 +149,15 @@
   .field-input[type="file"] { font-size: 12px; padding: 8px; }
   textarea.field-input { resize: vertical; min-height: 80px; line-height: 1.5; font-size: 14px; overflow: hidden; }
 
-  .btn-remove-logo { margin-top: 6px; font-size: 12px; font-family: var(--font); font-weight: 500; background: none; border: 1px solid var(--gray-3); color: var(--neg); padding: 4px 8px; border-radius: 4px; cursor: pointer; display: none; }
+  /* BOTONES DEL LOGO */
+  .btn-logo-action { 
+    margin-top: 6px; font-size: 12px; font-family: var(--font); font-weight: 500; 
+    background: none; border: 1px solid var(--gray-3); padding: 6px 10px; 
+    border-radius: 6px; cursor: pointer; display: none; transition: background 0.2s, color 0.2s;
+  }
+  .btn-logo-action:hover { background: var(--gray-2); }
+  .btn-logo-action.remove { color: var(--neg); }
+  .btn-logo-action.contrast { color: var(--white); margin-left: 6px; }
 
   /* PLATFORM BADGES */
   .platform-badge {
@@ -195,30 +206,22 @@
   .tldr-label { font-size: 13px; color: var(--gray-5); font-family: var(--font); font-weight: 500; }
   .tldr-value { font-family: var(--num-font); font-size: 20px; font-weight: 700; }
 
-  /* COVER LOGO (Responsive Text/Image) */
+  /* COVER LOGO (Adaptable, Sin Texto Por Defecto) */
   .cover-logo { 
+    display: none; /* Oculto por defecto si no hay imagen */
     width: fit-content; 
-    min-width: 64px; 
-    height: fit-content;
-    min-height: 64px;
     max-width: 100%;
-    padding: 12px 24px;
     border-radius: 16px; 
-    background: var(--yellow); 
-    display: inline-flex; 
-    align-items: center; 
-    justify-content: center; 
-    font-family: var(--title-font); 
-    font-size: 36px; 
-    font-weight: 400; 
-    color: #0A0A0A; 
     margin-bottom: 24px; 
     overflow: hidden; 
     transition: all 0.2s;
   }
   .cover-logo.has-image {
-    padding: 0;
-    background: transparent;
+    display: block; /* Se muestra solo al subir foto */
+  }
+  .cover-logo.with-bg {
+    background: var(--white); /* Este color se invierte automáticamente según el tema */
+    padding: 16px 24px;
   }
   .cover-logo img { 
     width: 100%; 
@@ -328,11 +331,7 @@
     
     .chart-wrap { page-break-inside: avoid !important; }
   }
-  <style>
-    html, body {
-      font-size: 18px !important; /* Aumento de 1px en la tipografía base */
-    }
-  </style>
+</style>
 </head>
 <body>
 <div id="app">
@@ -357,7 +356,7 @@
   <!-- PAGE 1 — PORTADA -->
   <div class="page active" id="page-1">
     <br><br>
-    <div class="cover-logo" id="cover-logo-display">BA</div>
+    <div class="cover-logo" id="cover-logo-display"></div>
     <div class="cover-agency">Bananas Agency</div>
     <div class="cover-title">Reporte Mensual</div>
     <div class="cover-meta" id="cover-date-display">— Mes / Año</div>
@@ -369,7 +368,10 @@
     <div class="field-group" id="logo-upload-group">
       <label class="field-label">Subir Logo (Reemplaza al texto y se ajusta al ancho)</label>
       <input class="field-input" type="file" id="client-logo-upload" accept="image/*">
-      <button class="btn-remove-logo" id="btn-remove-logo" onclick="removeLogo()">Quitar imagen</button>
+      <div style="display: flex; align-items: center;">
+        <button class="btn-logo-action remove" id="btn-remove-logo" onclick="removeLogo()">Quitar imagen</button>
+        <button class="btn-logo-action contrast" id="btn-contrast-logo" onclick="toggleLogoContrast()">Fondo de contraste</button>
+      </div>
     </div>
     
     <div class="field-group">
@@ -1015,6 +1017,7 @@ function toggleTheme() {
 const logoInput = document.getElementById('client-logo-upload');
 const logoDisplay = document.getElementById('cover-logo-display');
 const btnRemoveLogo = document.getElementById('btn-remove-logo');
+const btnContrastLogo = document.getElementById('btn-contrast-logo');
 
 logoInput.addEventListener('change', function(e) {
   const file = e.target.files[0];
@@ -1024,6 +1027,7 @@ logoInput.addEventListener('change', function(e) {
       logoDisplay.innerHTML = `<img src="${evt.target.result}" alt="Logo Cliente">`;
       logoDisplay.classList.add('has-image');
       btnRemoveLogo.style.display = 'inline-block';
+      btnContrastLogo.style.display = 'inline-block';
     };
     reader.readAsDataURL(file);
   }
@@ -1031,9 +1035,15 @@ logoInput.addEventListener('change', function(e) {
 
 function removeLogo() {
   logoInput.value = '';
-  logoDisplay.innerHTML = 'BA';
+  logoDisplay.innerHTML = '';
   logoDisplay.classList.remove('has-image');
+  logoDisplay.classList.remove('with-bg'); // Reset contrast
   btnRemoveLogo.style.display = 'none';
+  btnContrastLogo.style.display = 'none';
+}
+
+function toggleLogoContrast() {
+  logoDisplay.classList.toggle('with-bg');
 }
 
 // Auto-resize textareas 
@@ -1320,6 +1330,7 @@ function saveJSON() {
   if (logoEl.classList.contains('has-image')) {
     const img = logoEl.querySelector('img');
     if (img) data['_logo_base64'] = img.src;
+    if (logoEl.classList.contains('with-bg')) data['_logo_contrast'] = true;
   }
 
   const json = JSON.stringify(data);
@@ -1378,6 +1389,12 @@ document.getElementById('json-upload')?.addEventListener('change', function(e) {
         logoDisplay.innerHTML = `<img src="${data['_logo_base64']}" alt="Logo Cliente">`;
         logoDisplay.classList.add('has-image');
         document.getElementById('btn-remove-logo').style.display = 'inline-block';
+        document.getElementById('btn-contrast-logo').style.display = 'inline-block';
+        if (data['_logo_contrast']) {
+          logoDisplay.classList.add('with-bg');
+        } else {
+          logoDisplay.classList.remove('with-bg');
+        }
       }
 
       // Disparar cálculos visuales
