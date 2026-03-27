@@ -40,25 +40,7 @@
   [data-theme="light"] {
     --black: #FEFAE5;
     --white: #0A0A0A;
-    --yellow: #B08B2A; /* Mantenemos este ligeramente oscuro para mejor legibilidad del texto en fondo claro */
-    --yellow-dark: #925A02;
-    --gray-1: #FFFFFF;
-    --gray-2: #F4F4F5;
-    --gray-3: #D4D4D8;
-    --gray-4: #52525B;
-    --gray-5: #27272A;
-    --pos: #16A34A;
-    --neg: #DC2626;
-    --ig: #BE185D;
-    --tt-accent: #6A00FF;
-    --tt-accent-rgb: 106, 0, 255;
-    --theme-color: #FEFAE5;
-  }
-
-  [data-theme="light"] {
-    --black: #FEFAE5;
-    --white: #0A0A0A;
-    --yellow: #C27803;
+    --yellow: #B08B2A;
     --yellow-dark: #925A02;
     --gray-1: #FFFFFF;
     --gray-2: #F4F4F5;
@@ -216,7 +198,7 @@
   .plan-mantener { background: rgba(34,197,94,0.15); color: var(--pos); }
   .plan-mejorar { background: rgba(249,203,66,0.15); color: var(--yellow); }
   .plan-testear { background: rgba(var(--tt-accent-rgb), 0.15); color: var(--tt-accent); }
-  .plan-item { font-size: 14px; color: var(--gray-5); padding: 6px 0; border-bottom: 1px solid var(--gray-3); display: flex; align-items: flex-start; gap: 8px; }
+  .plan-item { font-size: 14px; color: var(--gray-5); padding: 6px 0; border-bottom: 1px solid var(--gray-2); display: flex; align-items: flex-start; gap: 8px; }
   .plan-item:last-child { border: none; }
   .plan-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; margin-top: 7px; flex-shrink: 0; }
 
@@ -262,6 +244,7 @@
   /* 🖨️ PDF VECTORIAL NATIVO (SIN CAPTURAS, TEXTO PURO SELECCIONABLE) */
   /* ========================================================= */
   @media print {
+    /* Quitamos el forzado de tamaño para que el navegador use la hoja y deje que el contenido fluya libremente */
     @page { margin: 0 !important; }
     
     html, body { 
@@ -274,26 +257,37 @@
     
     #app { max-width: 480px !important; width: 100% !important; margin: 0 auto !important; padding: 0 !important; }
     
+    /* Quitamos el 'page-break-after: always' para que la app se exporte como una sola infografía larga/continua adaptada al contenido */
     .page { 
-      display: block !important; page-break-after: always !important; page-break-inside: avoid !important;
-      padding: 40px 24px !important; height: auto !important; overflow: visible !important;
+      display: block !important; page-break-after: auto !important; page-break-inside: auto !important;
+      padding: 24px 24px !important; height: auto !important; overflow: visible !important; min-height: 0 !important;
       margin: 0 !important; opacity: 1 !important; transform: none !important; animation: none !important;
     }
-    .page:last-child { page-break-after: auto !important; }
 
-    .hide-in-print { display: none !important; }
+    /* Ocultamos los campos originales y los vacíos */
+    .hide-in-print, .hide-in-print-empty { display: none !important; }
     
+    /* Estilo para los textos clonados que reemplazan a los inputs */
     .print-fallback {
       margin: 0 !important; white-space: pre-wrap !important;
       word-wrap: break-word !important; overflow-wrap: break-word !important; outline: none !important; box-shadow: none !important;
     }
     div.print-fallback { display: block !important; width: 100% !important; height: auto !important; }
 
+    ::-webkit-input-placeholder { color: transparent !important; }
+    :-moz-placeholder { color: transparent !important; }
+    ::-moz-placeholder { color: transparent !important; }
+    :-ms-input-placeholder { color: transparent !important; }
+
     .card, .metric, .content-card, .tldr-stat, .conclusion-box { border: 1px solid var(--gray-2) !important; }
     .metric { background-color: var(--gray-2) !important; }
     .content-card { background-color: var(--gray-2) !important; border-left: 3px solid var(--yellow) !important; }
     
-    .chart-wrap { page-break-inside: avoid !important; }
+    /* Evitamos que tarjetas, bloques o gráficos se partan a la mitad entre hojas */
+    .card, .content-card, .chart-wrap, .metric, .plan-block {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
   }
 </style>
 </head>
@@ -720,6 +714,7 @@
       <div class="content-card">
         <div class="content-rank">IG #1</div>
         <input class="field-input" type="text" placeholder="Descripción del contenido / título" style="margin-bottom:8px;">
+        <input class="field-input" type="url" placeholder="URL de la publicación (opcional)" style="margin-bottom:8px; font-size:12px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
           <input class="field-input number-input" type="number" placeholder="Alcance" style="font-size:14px;">
           <input class="field-input number-input" type="number" placeholder="Guardados" style="font-size:14px;">
@@ -729,6 +724,7 @@
       <div class="content-card">
         <div class="content-rank">IG #2</div>
         <input class="field-input" type="text" placeholder="Descripción del contenido / título" style="margin-bottom:8px;">
+        <input class="field-input" type="url" placeholder="URL de la publicación (opcional)" style="margin-bottom:8px; font-size:12px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
           <input class="field-input number-input" type="number" placeholder="Alcance" style="font-size:14px;">
           <input class="field-input number-input" type="number" placeholder="Guardados" style="font-size:14px;">
@@ -738,6 +734,7 @@
       <div class="content-card">
         <div class="content-rank">IG #3</div>
         <input class="field-input" type="text" placeholder="Descripción del contenido / título" style="margin-bottom:8px;">
+        <input class="field-input" type="url" placeholder="URL de la publicación (opcional)" style="margin-bottom:8px; font-size:12px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
           <input class="field-input number-input" type="number" placeholder="Alcance" style="font-size:14px;">
           <input class="field-input number-input" type="number" placeholder="Guardados" style="font-size:14px;">
@@ -750,6 +747,7 @@
     <div class="content-card">
       <div class="content-rank">TT #1</div>
       <input class="field-input" type="text" placeholder="Descripción del video / título" style="margin-bottom:8px;">
+      <input class="field-input" type="url" placeholder="URL de la publicación (opcional)" style="margin-bottom:8px; font-size:12px;">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
         <input class="field-input number-input" type="number" placeholder="Views" style="font-size:14px;">
         <input class="field-input number-input" type="number" placeholder="Comentarios" style="font-size:14px;">
@@ -759,6 +757,7 @@
     <div class="content-card">
       <div class="content-rank">TT #2</div>
       <input class="field-input" type="text" placeholder="Descripción del video / título" style="margin-bottom:8px;">
+      <input class="field-input" type="url" placeholder="URL de la publicación (opcional)" style="margin-bottom:8px; font-size:12px;">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
         <input class="field-input number-input" type="number" placeholder="Views" style="font-size:14px;">
         <input class="field-input number-input" type="number" placeholder="Comentarios" style="font-size:14px;">
@@ -768,6 +767,7 @@
     <div class="content-card">
       <div class="content-rank">TT #3</div>
       <input class="field-input" type="text" placeholder="Descripción del video / título" style="margin-bottom:8px;">
+      <input class="field-input" type="url" placeholder="URL de la publicación (opcional)" style="margin-bottom:8px; font-size:12px;">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
         <input class="field-input number-input" type="number" placeholder="Views" style="font-size:14px;">
         <input class="field-input number-input" type="number" placeholder="Comentarios" style="font-size:14px;">
@@ -784,7 +784,8 @@
     <div class="platform-badge badge-ig">Instagram</div>
     <div class="field-group">
       <label class="field-label">Descripción del contenido</label>
-      <input class="field-input" type="text" placeholder="Ej: Carrusel estático del día 15">
+      <input class="field-input" type="text" placeholder="Ej: Carrusel estático del día 15" style="margin-bottom:8px;">
+      <input class="field-input" type="url" placeholder="URL de la publicación (opcional)" style="font-size:12px;">
     </div>
     <div class="card-row">
       <div class="field-group">
@@ -801,10 +802,11 @@
       <textarea class="field-input" placeholder="Ej: Bajo engagement en carruseles estáticos sin CTA claro ni hook visual." rows="3"></textarea>
     </div>
 
-    <div class="platform-badge badge-tt">TikTok</div>
+    <div class="platform-badge badge-tt" style="margin-top:20px;">TikTok</div>
     <div class="field-group">
       <label class="field-label">Descripción del video</label>
-      <input class="field-input" type="text" placeholder="Ej: Video de presentación de colección, 30 seg">
+      <input class="field-input" type="text" placeholder="Ej: Video de presentación de colección, 30 seg" style="margin-bottom:8px;">
+      <input class="field-input" type="url" placeholder="URL de la publicación (opcional)" style="font-size:12px;">
     </div>
     <div class="card-row">
       <div class="field-group">
@@ -966,7 +968,7 @@
     <div class="section-title">Alcance comparativo</div>
     <div style="display:flex;gap:12px;margin-bottom:8px;font-size:12px;color:#888;">
       <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#E1306C;display:inline-block;"></span>Mes actual</span>
-      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#444;display:inline-block;"></span>Mes anterior</span>
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#F9CB42;display:inline-block;"></span>Mes anterior</span>
     </div>
     <div class="chart-wrap"><canvas id="tldrCompChart"></canvas></div>
   </div>
@@ -1426,35 +1428,80 @@ function exportToPDF() {
   window.print();
 }
 
-// MAGIA PARA PDF: Convertimos todos los inputs y textareas en texto DOM real antes de imprimir.
-// Mantiene fondos, bordes y placeholders visibles.
+// MAGIA PARA PDF: Convertimos inputs en texto y links reales, y ocultamos las tarjetas/ítems que estén vacíos
 window.addEventListener('beforeprint', () => {
   document.querySelectorAll('input:not([type="file"]), textarea').forEach(el => {
-    // Evitar generar duplicados si se llama varias veces seguidas
+    // Si ya procesamos este elemento, saltar
     if (el.nextElementSibling && el.nextElementSibling.classList.contains('print-fallback')) return;
     
-    const fallback = document.createElement('div');
-    
-    // Le asignamos las mismas clases exactas para que herede bordes, fondos y tipografía
-    fallback.className = el.className + ' print-fallback';
-    fallback.style.cssText = el.style.cssText;
-    
-    // Mostramos el texto escrito, o el placeholder si está vacío
-    if (el.value) {
-      fallback.textContent = el.value;
-    } else {
-      fallback.textContent = el.placeholder || '';
-      fallback.style.color = 'var(--gray-4)'; // Apariencia de placeholder
-      fallback.style.opacity = '0.7';
+    const val = el.value.trim();
+
+    // LOGICA DE OCULTAR CAMPOS VACIOS
+    if (!val) {
+      // 1. Ocultar URL input vacíos sin tocar nada más
+      if (el.type === 'url') {
+        el.classList.add('hide-in-print');
+        return;
+      }
+      // 2. Nombres en línea (ej. nombres de videos TT) -> se ignoran (solo se esconden)
+      if (el.classList.contains('inline-name-input')) return;
+
+      // 3. Ítems del Plan Próximo Mes vacíos
+      const planItem = el.closest('.plan-item');
+      if (planItem) { planItem.classList.add('hide-in-print-empty'); return; }
+
+      // 4. Tarjetas de Top Contenido vacías (Revisa si la descripción está vacía)
+      const contentCard = el.closest('.content-card');
+      if (contentCard) {
+        const firstTextInput = contentCard.querySelector('input[type="text"]');
+        if (el === firstTextInput) {
+          contentCard.classList.add('hide-in-print-empty');
+          return;
+        }
+        if (contentCard.classList.contains('hide-in-print-empty')) return; // Ya está oculto
+      }
+
+      // 5. Textareas vacíos (conclusiones) o grupos generales de texto vacíos
+      const fieldGroup = el.closest('.field-group');
+      if (fieldGroup && el.type !== 'number') {
+        fieldGroup.classList.add('hide-in-print-empty');
+      }
+      return; // No construimos un fallback si está vacío
     }
 
-    // Ajuste clave para los inputs en línea (nombres de videos de TikTok)
-    if (el.classList.contains('inline-name-input')) {
-      fallback.style.display = 'inline-block';
-      fallback.style.width = 'auto';
-      fallback.style.minWidth = '80px';
+    // SI HAY TEXTO, CREAMOS EL FALLBACK VISUAL
+    let fallback;
+    
+    // Si es un link (URL), lo transformamos en un botón clickeable para el PDF
+    if (el.type === 'url') {
+      fallback = document.createElement('a');
+      fallback.href = val;
+      fallback.textContent = '🔗 Ver publicación';
+      fallback.target = '_blank';
+      fallback.style.cssText = `
+        display: inline-block;
+        margin-top: 4px; margin-bottom: 8px;
+        color: var(--yellow); text-decoration: none;
+        font-weight: 600; font-size: 13px; font-family: var(--font);
+        background: var(--gray-2); padding: 6px 12px;
+        border-radius: 6px; border: 1px solid var(--gray-3);
+      `;
+    } else {
+      // Es texto normal
+      fallback = document.createElement(el.tagName === 'TEXTAREA' ? 'div' : 'span');
+      fallback.textContent = val;
+      fallback.className = el.className + ' print-fallback';
+      fallback.style.cssText = el.style.cssText;
+      
+      // Adaptar estilos específicos en línea
+      if (el.classList.contains('inline-name-input')) {
+        fallback.style.display = 'inline-block';
+        fallback.style.width = 'auto';
+        fallback.style.minWidth = '80px';
+      }
     }
     
+    fallback.classList.add('print-fallback'); // Marca para limpiar luego
     el.parentNode.insertBefore(fallback, el.nextSibling);
     el.classList.add('hide-in-print');
   });
@@ -1463,7 +1510,10 @@ window.addEventListener('beforeprint', () => {
 // Limpieza automática tras volver al editor
 window.addEventListener('afterprint', () => {
   document.querySelectorAll('.print-fallback').forEach(el => el.remove());
-  document.querySelectorAll('.hide-in-print').forEach(el => el.classList.remove('hide-in-print'));
+  document.querySelectorAll('.hide-in-print, .hide-in-print-empty').forEach(el => {
+    el.classList.remove('hide-in-print');
+    el.classList.remove('hide-in-print-empty');
+  });
 });
 
 window.addEventListener('load', () => {
